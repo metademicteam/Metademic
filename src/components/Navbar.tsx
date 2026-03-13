@@ -45,7 +45,7 @@ export default function Navbar() {
                     {/* Right Side Actions */}
                     <div className="flex items-center gap-3 ml-auto">
                         <Link
-                            href="/signin"
+                            href="/login"
                             className="hidden md:inline-flex items-center px-4 py-1.5 text-[13px] font-medium text-mdpi-blue border border-mdpi-blue rounded hover:bg-mdpi-blue hover:text-white transition-all no-underline"
                         >
                             Sign In / Sign Up
@@ -80,7 +80,7 @@ export default function Navbar() {
                         </Link>
                     ))}
                     <div className="pt-3 mt-3 border-t border-mdpi-border flex gap-2">
-                        <Link href="/signin" className="flex-1 text-center py-2 text-[13px] font-medium text-mdpi-blue border border-mdpi-blue rounded no-underline">
+                        <Link href="/login" className="flex-1 text-center py-2 text-[13px] font-medium text-mdpi-blue border border-mdpi-blue rounded no-underline">
                             Sign In / Sign Up
                         </Link>
                         <Link href="/submit" className="flex-1 text-center py-2 text-[13px] font-bold text-white bg-mdpi-blue rounded no-underline">

@@ -43,6 +43,20 @@ create table public.profiles (
   website         text,
   h_index         integer default 0,
   is_verified     boolean default false,
+  -- Professional Profile Fields
+  workplace       text,
+  job_type        text,
+  title           text,
+  first_name      text,
+  middle_name     text,
+  last_name       text,
+  facebook        text,
+  twitter         text,
+  address1        text,
+  address2        text,
+  zip_code        text,
+  city            text,
+  time_zone       text,
   created_at      timestamptz default now(),
   updated_at      timestamptz default now()
 );
@@ -735,12 +749,29 @@ create policy "article_metrics: service role write"
 -- Auto-create profile on user signup
 create or replace function public.handle_new_user()
 returns trigger as $$
+declare
+  is_orcid boolean;
+  extracted_name text;
+  extracted_orcid text;
 begin
-  insert into public.profiles (id, full_name, email)
+  -- Check if this user signed up via ORCID
+  is_orcid := (new.raw_app_meta_data->>'provider' = 'orcid');
+
+  if is_orcid then
+    -- ORCID stores specific claims in custom_claims
+    extracted_name := coalesce(new.raw_user_meta_data->>'custom_claims'->>'given_name', '') || ' ' || coalesce(new.raw_user_meta_data->>'custom_claims'->>'family_name', '');
+    extracted_orcid := new.raw_user_meta_data->>'sub'; -- The ORCID iD is often in the 'sub' claim
+  else
+    extracted_name := coalesce(new.raw_user_meta_data->>'full_name', 'New User');
+    extracted_orcid := null;
+  end if;
+
+  insert into public.profiles (id, full_name, email, orcid)
   values (
     new.id,
-    coalesce(new.raw_user_meta_data->>'full_name', 'New User'),
-    new.email
+    trim(extracted_name),
+    new.email,
+    extracted_orcid
   );
   return new;
 end;
