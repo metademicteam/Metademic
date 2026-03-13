@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+:root {
+  --mdpi-blue: #004a87;
+  --mdpi-blue-light: #2a7ab8;
+  --mdpi-blue-dark: #003366;
+  --mdpi-hero-gradient-start: #5b9bd5;
+  --mdpi-hero-gradient-end: #1a5276;
+  --mdpi-green: #007b5e;
+  --mdpi-maroon: #8b0000;
+  --mdpi-gray-bg: #f0f2f5;
+  --mdpi-gray-light: #e8e8e8;
+  --mdpi-gray-text: #555;
+  --mdpi-footer-bg: #2c3e50;
+  --mdpi-footer-dark: #1a252f;
+  --mdpi-link-blue: #0056b3;
+  --mdpi-white: #ffffff;
+  --mdpi-border: #ddd;
+  --mdpi-text-dark: #333;
+  --mdpi-text-body: #444;
+}
+
+@theme inline {
+  --color-mdpi-blue: var(--mdpi-blue);
+  --color-mdpi-blue-light: var(--mdpi-blue-light);
+  --color-mdpi-blue-dark: var(--mdpi-blue-dark);
+  --color-mdpi-green: var(--mdpi-green);
+  --color-mdpi-maroon: var(--mdpi-maroon);
+  --color-mdpi-gray-bg: var(--mdpi-gray-bg);
+  --color-mdpi-gray-light: var(--mdpi-gray-light);
+  --color-mdpi-gray-text: var(--mdpi-gray-text);
+  --color-mdpi-footer-bg: var(--mdpi-footer-bg);
+  --color-mdpi-footer-dark: var(--mdpi-footer-dark);
+  --color-mdpi-link-blue: var(--mdpi-link-blue);
+  --color-mdpi-border: var(--mdpi-border);
+  --color-mdpi-text-dark: var(--mdpi-text-dark);
+  --color-mdpi-text-body: var(--mdpi-text-body);
+
+  --font-sans: var(--font-open-sans);
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: var(--mdpi-gray-bg);
+    color: var(--mdpi-text-body);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  a {
+    color: var(--mdpi-link-blue);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Badge styles */
+.badge-open-access {
+  background-color: var(--mdpi-green);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.badge-article {
+  background-color: var(--mdpi-maroon);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Journal icon grid */
+.journal-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+/* Carousel dots */
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.carousel-dot.active {
+  background-color: white;
+}
+
+/* Subject category link */
+.subject-link {
+  color: var(--mdpi-link-blue);
+  font-size: 13px;
+  padding: 4px 0;
+  display: block;
+  transition: color 0.2s;
+}
+
+.subject-link:hover {
+  color: var(--mdpi-blue);
+  text-decoration: underline;
+}
+
+.subject-link.active {
+  font-weight: 700;
+  color: var(--mdpi-blue);
+}
