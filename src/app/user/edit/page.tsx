@@ -32,7 +32,7 @@ interface Profile {
   email?: string;
 }
 
-export default function ProfilePage() {
+export default function EditProfilePage() {
   const supabase = createClient();
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -70,6 +70,18 @@ export default function ProfilePage() {
     }
   };
 
+  const handleOrcidConnect = () => {
+    const clientId = process.env.NEXT_PUBLIC_ORCID_CLIENT_ID;
+    if (!clientId) {
+      alert("Configuration Error: ORCID Client ID is missing.");
+      return;
+    }
+    const redirectUri = encodeURIComponent(`http://127.0.0.1:3000/api/auth/orcid/callback`);
+    const scopes = encodeURIComponent('/authenticate /read-limited');
+    const orcidUrl = `https://orcid.org/oauth/authorize?client_id=${clientId}&response_type=code&scope=${scopes}&redirect_uri=${redirectUri}`;
+    window.location.href = orcidUrl;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setProfile({ ...profile, [e.target.id]: e.target.value });
   };
@@ -77,11 +89,11 @@ export default function ProfilePage() {
   if (isLoading) return <div className="p-8 text-center text-gray-500">Loading profile...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
+    <div className="max-w-4xl mx-auto space-y-6 px-4 py-10 pb-20">
       {/* Header Section */}
       <div className="flex items-center justify-between border-b border-gray-100 pb-5">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Edit Profile Data</h1>
+          <h1 className="text-xl font-bold text-gray-800">Edit Professional Profile</h1>
           <div className="flex items-center gap-2 mt-1">
              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">User ID: {profile?.id?.substring(0,8)}</span>
           </div>
@@ -106,13 +118,23 @@ export default function ProfilePage() {
                <div className="w-8 h-8 rounded-full bg-[#A6CE39] flex items-center justify-center text-white text-xs font-bold ring-4 ring-[#a6ce39]/10">iD</div>
                <div>
                  <p className="text-sm font-medium text-gray-900">
-                   ORCID {profile?.orcid || "0000-0000-0000-0000"} 
-                   <span className="ml-3 text-[var(--mdpi-link-blue)] cursor-pointer hover:underline text-xs">[Unbind]</span>
+                   {profile?.orcid ? (
+                     <>
+                       ORCID {profile.orcid}
+                       <span className="ml-3 text-[var(--mdpi-link-blue)] cursor-pointer hover:underline text-xs">[Unbind]</span>
+                     </>
+                   ) : (
+                     <span className="text-gray-400 italic">No ORCID iD connected</span>
+                   )}
                    <span className="ml-2 text-gray-400 text-xs">[What is this?]</span>
                  </p>
                </div>
             </div>
-            <Button type="button" variant="outline" size="sm" className="text-xs border-gray-200 h-8">Update ORCID</Button>
+            {profile?.orcid ? (
+              <Button type="button" onClick={handleOrcidConnect} variant="outline" size="sm" className="text-xs border-gray-200 h-8">Update ORCID</Button>
+            ) : (
+              <Button type="button" onClick={handleOrcidConnect} className="bg-[#A6CE39] hover:bg-[#88ae2d] text-white text-xs h-8 font-bold">Connect ORCID</Button>
+            )}
           </div>
         </div>
 

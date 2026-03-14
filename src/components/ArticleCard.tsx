@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { FileText, Download, ChevronDown, ChevronUp, Eye } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { useState } from 'react'
 
 interface ArticleProps {

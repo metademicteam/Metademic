@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ChevronRight, Search } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 
 const journalColors: Record<string, string> = {
     'Sustainability': '#4caf50',

@@ -1,8 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, ChevronDown, Menu, X } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronDown, Menu, X, User, LogOut, FilePlus } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { createClient } from '@/utils/supabase/client'
+import { useRouter } from 'next/navigation'
+
+import { User as SupabaseUser } from '@supabase/supabase-js'
 
 const navLinks = [
     { label: 'Journals', href: '/journals', hasDropdown: true },
@@ -15,6 +19,29 @@ const navLinks = [
 
 export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false)
+    const [user, setUser] = useState<SupabaseUser | null>(null)
+    const supabase = createClient()
+    const router = useRouter()
+
+    useEffect(() => {
+        const getUser = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            setUser(session?.user ?? null)
+        }
+        getUser()
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [supabase.auth])
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut()
+        router.push('/')
+        router.refresh()
+    }
 
     return (
         <nav className="bg-white border-b border-mdpi-border sticky top-0 z-50 shadow-sm">
@@ -44,18 +71,46 @@ export default function Navbar() {
 
                     {/* Right Side Actions */}
                     <div className="flex items-center gap-3 ml-auto">
-                        <Link
-                            href="/login"
-                            className="hidden md:inline-flex items-center px-4 py-1.5 text-[13px] font-medium text-mdpi-blue border border-mdpi-blue rounded hover:bg-mdpi-blue hover:text-white transition-all no-underline"
-                        >
-                            Sign In / Sign Up
-                        </Link>
-                        <Link
-                            href="/submit"
-                            className="hidden md:inline-flex items-center px-5 py-1.5 text-[13px] font-bold text-white bg-mdpi-blue rounded hover:bg-mdpi-blue-dark transition-colors no-underline"
-                        >
-                            Submit
-                        </Link>
+                        {user ? (
+                            <>
+                                <Link
+                                    href="/user/edit"
+                                    className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium text-mdpi-text-dark hover:text-mdpi-blue transition-all no-underline"
+                                >
+                                    <User size={16} />
+                                    Profile
+                                </Link>
+                                <Link
+                                    href="/user/submit"
+                                    className="hidden md:inline-flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-bold text-white bg-mdpi-blue rounded hover:bg-mdpi-blue-dark transition-colors no-underline"
+                                >
+                                    <FilePlus size={16} />
+                                    Submit
+                                </Link>
+                                <button
+                                    onClick={handleSignOut}
+                                    className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 rounded transition-all"
+                                >
+                                    <LogOut size={16} />
+                                    Sign Out
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    href="/login"
+                                    className="hidden md:inline-flex items-center px-4 py-1.5 text-[13px] font-medium text-mdpi-blue border border-mdpi-blue rounded hover:bg-mdpi-blue hover:text-white transition-all no-underline"
+                                >
+                                    Sign In / Sign Up
+                                </Link>
+                                <Link
+                                    href="/submit"
+                                    className="hidden md:inline-flex items-center px-5 py-1.5 text-[13px] font-bold text-white bg-mdpi-blue rounded hover:bg-mdpi-blue-dark transition-colors no-underline"
+                                >
+                                    Submit
+                                </Link>
+                            </>
+                        )}
                         <button
                             className="lg:hidden p-2 text-mdpi-gray-text"
                             onClick={() => setMobileOpen(!mobileOpen)}
@@ -79,13 +134,48 @@ export default function Navbar() {
                             {link.label}
                         </Link>
                     ))}
-                    <div className="pt-3 mt-3 border-t border-mdpi-border flex gap-2">
-                        <Link href="/login" className="flex-1 text-center py-2 text-[13px] font-medium text-mdpi-blue border border-mdpi-blue rounded no-underline">
-                            Sign In / Sign Up
-                        </Link>
-                        <Link href="/submit" className="flex-1 text-center py-2 text-[13px] font-bold text-white bg-mdpi-blue rounded no-underline">
-                            Submit
-                        </Link>
+                    <div className="pt-3 mt-3 border-t border-mdpi-border flex flex-col gap-2">
+                        {user ? (
+                            <>
+                                <Link 
+                                    href="/user/edit" 
+                                    className="text-center py-2 text-[13px] font-medium text-mdpi-text-dark border border-mdpi-border rounded no-underline"
+                                    onClick={() => setMobileOpen(false)}
+                                >
+                                    Profile
+                                </Link>
+                                <Link 
+                                    href="/user/submit" 
+                                    className="text-center py-2 text-[13px] font-bold text-white bg-mdpi-blue rounded no-underline"
+                                    onClick={() => setMobileOpen(false)}
+                                >
+                                    Submit
+                                </Link>
+                                <button 
+                                    onClick={handleSignOut}
+                                    className="text-center py-2 text-[13px] font-medium text-red-600 border border-red-100 rounded no-underline"
+                                >
+                                    Sign Out
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link 
+                                    href="/login" 
+                                    className="text-center py-2 text-[13px] font-medium text-mdpi-blue border border-mdpi-blue rounded no-underline"
+                                    onClick={() => setMobileOpen(false)}
+                                >
+                                    Sign In / Sign Up
+                                </Link>
+                                <Link 
+                                    href="/submit" 
+                                    className="text-center py-2 text-[13px] font-bold text-white bg-mdpi-blue rounded no-underline"
+                                    onClick={() => setMobileOpen(false)}
+                                >
+                                    Submit
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

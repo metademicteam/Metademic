@@ -2,7 +2,7 @@
 
 import { FileText, Send, CheckSquare, MessageSquare } from "lucide-react";
 
-export default function DashboardHome() {
+export default function UserDashboardPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>

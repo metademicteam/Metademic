@@ -5,264 +5,272 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MoveRight, Mail, Lock, User, Building, MapPin, BadgeCheck } from "lucide-react";
-import { motion } from "framer-motion";
+import { Mail, Phone } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
-    fullName: "",
     email: "",
     password: "",
-    orcid: "",
-    affiliation: "",
-    country: "",
+    repeatPassword: "",
+    acceptTerms: false,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    const { id, value, type } = e.target;
+    if (type === "checkbox") {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData({ ...formData, [id]: checked });
+    } else {
+      setFormData({ ...formData, [id]: value });
+    }
   };
+
+  const passwordRequirements = [
+    { id: 1, label: "Minimum 8 characters", regex: /.{8,}/ },
+    { id: 2, label: "Minimum one small letter", regex: /[a-z]/ },
+    { id: 3, label: "Minimum one capital letter", regex: /[A-Z]/ },
+    { id: 4, label: "Minimum one number", regex: /[0-9]/ },
+  ];
+
+  const getPasswordMetrics = (password: string) => {
+    const checks = passwordRequirements.map(req => ({
+      ...req,
+      isMet: req.regex.test(password)
+    }));
+    const metCount = checks.filter(c => c.isMet).length;
+    
+    let strength = "Weak";
+    let colorClass = "text-red-500";
+    let bgClass = "bg-red-500";
+
+    if (metCount === 4) {
+      strength = "Strong";
+      colorClass = "text-green-600";
+      bgClass = "bg-green-600";
+    } else if (metCount >= 2) {
+      strength = "Medium";
+      colorClass = "text-yellow-600";
+      bgClass = "bg-yellow-500";
+    }
+
+    return { checks, strength, colorClass, bgClass, isStrong: metCount === 4 };
+  };
+
+  const metrics = getPasswordMetrics(formData.password);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Supabase Auth Integration goes here later
+
+    // Explicit validation for required fields
+    if (!formData.email || !formData.password || !formData.repeatPassword) {
+      alert("Please fill in all required fields marked with *");
+      return;
+    }
+
+    if (!metrics.isStrong) {
+      alert("Registration failed: Password is too weak. Please meet all requirements.");
+      return;
+    }
+
+    if (formData.password !== formData.repeatPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    
+    if (!formData.acceptTerms) {
+      alert("Please accept the Terms of Use and Privacy Policy");
+      return;
+    }
+    
     console.log("Register form submitted:", formData);
   };
 
-  const handleOrcidLogin = () => {
-    const clientId = process.env.NEXT_PUBLIC_ORCID_CLIENT_ID;
-    const redirectUri = encodeURIComponent(`http://127.0.0.1:3000/api/auth/orcid/callback`);
-    const orcidUrl = `https://orcid.org/oauth/authorize?client_id=${clientId}&response_type=code&scope=/authenticate&redirect_uri=${redirectUri}`;
-    window.location.href = orcidUrl;
-  };
-
   return (
-    <div className="min-h-screen bg-[#f0f2f5] flex items-center justify-center p-4 sm:p-8">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-6xl bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] overflow-hidden flex flex-col lg:flex-row"
-      >
-        {/* Left Side: Branding/Info */}
-        <div className="w-full lg:w-4/12 bg-gradient-to-br from-[var(--mdpi-blue)] to-[var(--mdpi-blue-dark)] p-10 flex flex-col justify-between text-white relative overflow-hidden order-2 lg:order-1">
-          {/* Decorative background circles */}
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-white opacity-5 blur-2xl"></div>
+    <div className="min-h-screen bg-white flex flex-col">
+      <Navbar />
 
-          <div className="relative z-10 hidden lg:block">
-            <Link href="/" className="inline-block mb-12">
-              <h1 className="text-3xl font-bold tracking-tight">Metademic</h1>
-            </Link>
-            <div className="space-y-6">
-              <h2 className="text-3xl font-semibold leading-tight">Join the academic community.</h2>
-              <div className="space-y-4 mt-8">
-                <div className="flex items-start gap-3">
-                  <BadgeCheck className="w-6 h-6 text-blue-300 shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-white">Publish Open Access</h4>
-                    <p className="text-blue-100 text-sm mt-1">Share your research with the world securely and rapidly.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <BadgeCheck className="w-6 h-6 text-blue-300 shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-white">Manage Submissions</h4>
-                    <p className="text-blue-100 text-sm mt-1">Track your articles through the peer-review process.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <BadgeCheck className="w-6 h-6 text-blue-300 shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-white">Build Your Profile</h4>
-                    <p className="text-blue-100 text-sm mt-1">Link your ORCID and affiliation to boost your academic presence.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-12 lg:mt-16 relative z-10">
-            <p className="text-blue-200 text-sm">Already have an account?</p>
-            <Link 
-              href="/login" 
-              className="mt-2 inline-flex items-center text-white font-medium hover:text-blue-200 transition-colors group"
-            >
-              Sign in instead
-              <MoveRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
+      {/* Header Bar */}
+      <div className="bg-[#f2f2f2] border-b border-gray-200 py-2.5 px-4 md:px-8 lg:px-12">
+        <div className="max-w-[1200px] mx-auto w-full">
+          <h2 className="text-gray-500 text-[13px] font-medium">User Registration</h2>
         </div>
+      </div>
 
-        {/* Right Side: Register Form */}
-        <div className="w-full lg:w-8/12 p-8 sm:p-10 lg:p-12 flex flex-col justify-center bg-white order-1 lg:order-2">
-          <div className="w-full max-w-2xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h3>
-                <p className="text-gray-500 text-sm">Fill in your details to set up your profile.</p>
-              </div>
-              <Link href="/" className="lg:hidden text-2xl font-bold tracking-tight text-[var(--mdpi-blue)]">
-                Metademic
-              </Link>
+      <main className="flex-grow max-w-[1200px] mx-auto w-full px-4 md:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-16 gap-y-12">
+          
+          {/* Left Column: Register Form */}
+          <div className="lg:col-span-7">
+            <div className="mb-10">
+              <h1 className="text-[22px] font-bold text-[#004a99] mb-4">Registration</h1>
+              <div className="h-[1px] bg-gray-200 w-full"></div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Mandatory Fields */}
-              <div className="bg-gray-50/50 p-6 rounded-xl border border-gray-100 space-y-5">
-                <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-2">Required Information</h4>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="fullName" className="text-gray-700">Full Name <span className="text-red-500">*</span></Label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <User className="h-4 w-4 text-gray-400" />
-                      </div>
-                      <Input 
-                        id="fullName" 
-                        type="text" 
-                        placeholder="Dr. Jane Doe" 
-                        className="pl-10 h-11"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        required 
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-700">Email Address <span className="text-red-500">*</span></Label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Mail className="h-4 w-4 text-gray-400" />
-                      </div>
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        placeholder="jane.doe@university.edu" 
-                        className="pl-10 h-11"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required 
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-gray-700">Password <span className="text-red-500">*</span></Label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock className="h-4 w-4 text-gray-400" />
-                      </div>
-                      <Input 
-                        id="password" 
-                        type="password" 
-                        placeholder="Create a password" 
-                        className="pl-10 h-11"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required 
-                      />
-                    </div>
-                  </div>
+            <form onSubmit={handleSubmit} className="space-y-7">
+              {/* Email Field */}
+              <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                <div className="md:w-36 flex justify-end shrink-0 pt-2">
+                  <Label htmlFor="email" className="text-gray-900 text-[13px] font-bold text-right relative inline-block">
+                    <span className="text-red-600 absolute -left-3">*</span>E-Mail address
+                  </Label>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    className="h-9 border-gray-300 rounded-none w-full max-w-md focus-visible:ring-1 focus-visible:ring-[#004a99] focus-visible:border-[#004a99]" 
+                    value={formData.email}
+                    onChange={handleChange}
+                    required 
+                  />
+                  <p className="text-[11px] text-gray-500 leading-tight max-w-md">
+                    Please provide a valid e-mail address as you will be required to confirm it.
+                  </p>
                 </div>
               </div>
 
-              {/* Optional Fields based on schema */}
-              <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-[0_2px_10px_rgb(0,0,0,0.02)] space-y-5">
-                <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-2">Academic Profile <span className="text-gray-400 normal-case font-normal">(Optional)</span></h4>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="orcid" className="text-gray-700 flex justify-between">
-                      <span>ORCID iD</span>
-                      <a href="https://orcid.org/register" target="_blank" rel="noreferrer" className="text-xs text-[var(--mdpi-link-blue)] hover:underline">What is ORCID?</a>
+              {/* Password Field */}
+              <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                <div className="md:w-36 flex justify-end shrink-0 pt-2">
+                  <Label htmlFor="password" className="text-gray-900 text-[13px] font-bold text-right relative inline-block">
+                    <span className="text-red-600 absolute -left-3">*</span>Password
+                  </Label>
+                </div>
+                <div className="flex-1 space-y-3">
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    className="h-9 border-gray-300 rounded-none w-full max-w-md focus-visible:ring-1 focus-visible:ring-[#004a99] focus-visible:border-[#004a99]" 
+                    value={formData.password}
+                    onChange={handleChange}
+                    required 
+                  />
+                  
+                  {/* Password Strength UI */}
+                  {formData.password && (
+                    <div className="max-w-md space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <div className="flex items-center justify-between text-[11px] font-bold">
+                        <span className="text-gray-600">Password Strength:</span>
+                        <span className={metrics.colorClass}>{metrics.strength}</span>
+                      </div>
+                      <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full transition-all duration-500 ease-out ${metrics.bgClass}`}
+                          style={{ width: `${(metrics.checks.filter(c => c.isMet).length / 4) * 100}%` }}
+                        ></div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 pt-1 opacity-90">
+                        {metrics.checks.map(check => (
+                          <div key={check.id} className="flex items-center gap-1.5">
+                            <div className={`w-1.5 h-1.5 rounded-full shrink-0 transition-colors duration-300 ${check.isMet ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                            <span className={`text-[10px] leading-none ${check.isMet ? 'text-gray-800 font-medium' : 'text-gray-400'}`}>
+                              {check.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Repeat Password Field */}
+              <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                <div className="md:w-36 flex justify-end shrink-0 pt-2 text-right">
+                  <Label htmlFor="repeatPassword" className="text-gray-900 text-[13px] font-bold relative inline-block leading-tight">
+                    <span className="text-red-600 absolute -left-3 top-[-2px]">*</span>Repeat New Password
+                  </Label>
+                </div>
+                <div className="flex-1">
+                  <Input 
+                    id="repeatPassword" 
+                    type="password" 
+                    className="h-9 border-gray-300 rounded-none w-full max-w-md focus-visible:ring-1 focus-visible:ring-[#004a99] focus-visible:border-[#004a99]" 
+                    value={formData.repeatPassword}
+                    onChange={handleChange}
+                    required 
+                  />
+                </div>
+              </div>
+
+              {/* Terms and Privacy */}
+              <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                <div className="md:w-36 flex justify-end shrink-0 pt-1">
+                  <span className="text-red-600 text-sm font-bold">*</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-start gap-3">
+                    <input 
+                      id="acceptTerms" 
+                      type="checkbox"
+                      checked={formData.acceptTerms}
+                      onChange={(e) => setFormData({ ...formData, acceptTerms: e.target.checked })}
+                      className="mt-1 w-4 h-4 border-gray-400 rounded-none accent-[#004a99] cursor-pointer"
+                    />
+                    <Label htmlFor="acceptTerms" className="text-[12px] text-gray-700 leading-relaxed font-normal cursor-pointer">
+                      I have read the <Link href="/terms" className="text-[#004a99] hover:underline font-medium">Terms of Use</Link> and the <Link href="/privacy" className="text-[#004a99] hover:underline font-medium">Privacy Policy</Link> and I accept them.
                     </Label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <div className="w-4 h-4 rounded-full bg-[#A6CE39] flex items-center justify-center text-white font-bold text-[8px]">iD</div>
-                      </div>
-                      <Input 
-                        id="orcid" 
-                        type="text" 
-                        placeholder="0000-0000-0000-0000" 
-                        className="pl-10 h-11"
-                        value={formData.orcid}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="affiliation" className="text-gray-700">Institution / Affiliation</Label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Building className="h-4 w-4 text-gray-400" />
-                      </div>
-                      <Input 
-                        id="affiliation" 
-                        type="text" 
-                        placeholder="University of Science" 
-                        className="pl-10 h-11"
-                        value={formData.affiliation}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="country" className="text-gray-700">Country</Label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <MapPin className="h-4 w-4 text-gray-400" />
-                      </div>
-                      <Input 
-                        id="country" 
-                        type="text" 
-                        placeholder="e.g. United States" 
-                        className="pl-10 h-11"
-                        value={formData.country}
-                        onChange={handleChange}
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between pt-2">
-                <p className="text-xs text-gray-500 max-w-sm">
-                  By registering, you agree to our <Link href="/terms" className="text-[var(--mdpi-link-blue)] hover:underline">Terms & Conditions</Link> and <Link href="/privacy" className="text-[var(--mdpi-link-blue)] hover:underline">Privacy Policy</Link>.
-                </p>
-                <Button type="submit" className="w-full sm:w-auto px-8 h-12 text-base font-medium shrink-0">
-                  Create Account
-                </Button>
+              {/* Submit Button */}
+              <div className="flex flex-col md:flex-row gap-4 md:gap-6 pt-2">
+                <div className="md:w-36 shrink-0"></div>
+                <div className="flex-1">
+                  <Button type="submit" className="bg-[#005bb7] hover:bg-[#004a99] text-white rounded-md px-6 h-10 text-[14px] font-bold transition-colors shadow-sm">
+                    Register with metademic.com
+                  </Button>
+                </div>
               </div>
             </form>
 
-            {/* Divider */}
-            <div className="mt-10 flex items-center before:flex-1 before:border-t before:border-gray-200 after:flex-1 after:border-t after:border-gray-200">
-              <span className="px-4 text-sm text-gray-500 bg-white">Or sign up with</span>
-            </div>
-
-            {/* Alternative Logins - Future Placements */}
-            <div className="mt-8 grid grid-cols-2 gap-4">
-              <Button type="button" variant="outline" className="h-12 w-full flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors">
-                <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-                  <path d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z" fill="#EA4335" />
-                  <path d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z" fill="#4285F4" />
-                  <path d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z" fill="#FBBC05" />
-                  <path d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.26538 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z" fill="#34A853" />
-                </svg>
-                Google
-              </Button>
-              <Button type="button" onClick={handleOrcidLogin} variant="outline" className="h-12 w-full flex items-center justify-center gap-2 hover:bg-[#a6ce39]/10 hover:text-[#a6ce39] hover:border-[#a6ce39] transition-colors">
-                <div className="w-5 h-5 rounded-full bg-[#A6CE39] flex items-center justify-center text-white font-bold text-[10px]">iD</div>
-                ORCID
-              </Button>
+            <div className="mt-16">
+              <p className="text-[11px] text-gray-500 italic">
+                <span className="text-red-600 not-italic font-bold">*</span> denotes required fields.
+              </p>
             </div>
           </div>
+
+          {/* Right Column: Benefits & Contact */}
+          <div className="lg:col-span-4 lg:col-start-9 space-y-12">
+            <div className="space-y-5">
+              <h3 className="text-[14px] font-medium text-gray-600">Your benefits of registering with metademic.com:</h3>
+              <p className="text-[14px] font-bold text-gray-800">As a registered user you can:</p>
+              <ul className="space-y-1.5 list-disc pl-5 text-[13px] text-gray-600 leading-relaxed">
+                <li>submit and track the progress of your manuscripts online</li>
+                <li>subscribe to receive free table of contents for your favorite journals</li>
+                <li>manage your e-mail alerts and alert frequency</li>
+                <li>save and manage your search queries</li>
+                <li>receive new publications matching your search queries</li>
+              </ul>
+              <p className="text-[13px] text-gray-600">
+                Registration takes 30 seconds. <Link href="/login" className="text-red-600 hover:underline font-medium">Register now.</Link>
+              </p>
+            </div>
+
+            {/* Contact Box */}
+            <div className="border border-gray-200 p-8 bg-[#fbfbfb] shadow-sm">
+              <h3 className="text-[14px] font-bold text-gray-700 mb-6">Contact us</h3>
+              <div className="space-y-4">
+                <Link href="/contact" className="flex items-center gap-3 text-[#004a99] hover:underline text-[13px] font-semibold">
+                  <Mail className="w-4 h-4 text-[#004a99]" />
+                  Contact Form
+                </Link>
+                <div className="flex items-center gap-3 text-gray-700 text-[13px] font-semibold">
+                  <Phone className="w-4 h-4 text-gray-500" />
+                  +41 61 683 77 34
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
-      </motion.div>
+      </main>
+
+      <Footer />
     </div>
   );
 }

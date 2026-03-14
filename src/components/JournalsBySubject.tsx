@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const subjectCategories = [
     'Biology & Life Sciences',

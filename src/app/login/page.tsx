@@ -27,13 +27,19 @@ export default function LoginPage() {
       return;
     }
     
-    window.location.href = '/dashboard';
+    window.location.href = '/user/myprofile';
   };
 
   const handleOrcidLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_ORCID_CLIENT_ID;
+    if (!clientId) {
+      console.error("ORCID Client ID is missing. Please check your .env file for NEXT_PUBLIC_ORCID_CLIENT_ID");
+      alert("Configuration Error: ORCID Client ID is missing.");
+      return;
+    }
     const redirectUri = encodeURIComponent(`http://127.0.0.1:3000/api/auth/orcid/callback`);
-    const orcidUrl = `https://orcid.org/oauth/authorize?client_id=${clientId}&response_type=code&scope=/authenticate&redirect_uri=${redirectUri}`;
+    const scopes = encodeURIComponent('/authenticate /read-limited');
+    const orcidUrl = `https://orcid.org/oauth/authorize?client_id=${clientId}&response_type=code&scope=${scopes}&redirect_uri=${redirectUri}`;
     window.location.href = orcidUrl;
   };
 

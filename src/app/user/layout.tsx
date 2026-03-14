@@ -5,7 +5,7 @@ import {
   HelpCircle, ChevronDown, UserCheck
 } from "lucide-react";
 
-export default function DashboardLayout({
+export default function UserLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -30,20 +30,16 @@ export default function DashboardLayout({
             </div>
             <ul className="space-y-1">
               {[
-                { label: "Dashboard", icon: BarChart3, href: "/dashboard" },
-                { label: "Manage Accounts", icon: Layers, href: "/dashboard/accounts" },
-                { label: "Change Password", icon: Lock, href: "/dashboard/password" },
-                { label: "Profile", icon: User, href: "/dashboard/profile", active: true },
+                { label: "Dashboard", icon: BarChart3, href: "/user/myprofile" },
+                { label: "Manage Accounts", icon: Layers, href: "/user/accounts" },
+                { label: "Change Password", icon: Lock, href: "/user/password" },
+                { label: "Profile", icon: User, href: "/user/edit" },
                 { label: "Logout", icon: LogOut, href: "/login" },
               ].map((item) => (
                 <li key={item.label}>
                   <Link 
                     href={item.href}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                      item.active 
-                        ? "bg-blue-50 text-[var(--mdpi-blue)] font-medium" 
-                        : "text-gray-600 hover:bg-gray-50"
-                    }`}
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
                   >
                     <item.icon className="w-4 h-4" />
                     {item.label}
@@ -61,10 +57,10 @@ export default function DashboardLayout({
             </div>
             <ul className="space-y-1">
               {[
-                { label: "Submit", icon: Send, href: "/dashboard/submit" },
-                { label: "Submitted Manuscripts", icon: FileText, href: "/dashboard/manuscripts" },
-                { label: "Co-Authored Manuscripts", icon: UserCheck, href: "/dashboard/co-authored" },
-                { label: "Author Services", icon: Settings, href: "/dashboard/services" },
+                { label: "Submit", icon: Send, href: "/user/submit" },
+                { label: "Submitted Manuscripts", icon: FileText, href: "/user/manuscripts" },
+                { label: "Co-Authored Manuscripts", icon: UserCheck, href: "/user/co-authored" },
+                { label: "Author Services", icon: Settings, href: "/user/services" },
               ].map((item) => (
                 <li key={item.label}>
                   <Link 
@@ -87,7 +83,7 @@ export default function DashboardLayout({
             </div>
             <ul className="space-y-1">
               {[
-                { label: "Volunteer Preferences", icon: CheckSquare, href: "/dashboard/volunteer" },
+                { label: "Volunteer Preferences", icon: CheckSquare, href: "/user/volunteer" },
               ].map((item) => (
                 <li key={item.label}>
                   <Link 
