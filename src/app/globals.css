@@ -10,14 +10,14 @@
   --mdpi-maroon: #8b0000;
   --mdpi-gray-bg: #f0f2f5;
   --mdpi-gray-light: #e8e8e8;
-  --mdpi-gray-text: #555;
+  --mdpi-gray-text: #000000;
   --mdpi-footer-bg: #2c3e50;
   --mdpi-footer-dark: #1a252f;
   --mdpi-link-blue: #0056b3;
   --mdpi-white: #ffffff;
   --mdpi-border: #ddd;
-  --mdpi-text-dark: #333;
-  --mdpi-text-body: #444;
+  --mdpi-text-dark: #000000;
+  --mdpi-text-body: #000000;
 }
 
 @theme inline {

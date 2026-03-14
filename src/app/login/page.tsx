@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MoveRight, Mail, Lock } from "lucide-react";
 import { motion } from "framer-motion";
@@ -16,7 +15,6 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Standard Email Login logic goes here
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -24,6 +22,7 @@ export default function LoginPage() {
     
     if (error) {
       console.error(error);
+      alert(error.message);
       return;
     }
     
@@ -37,8 +36,8 @@ export default function LoginPage() {
       alert("Configuration Error: ORCID Client ID is missing.");
       return;
     }
-    const redirectUri = encodeURIComponent(`http://127.0.0.1:3000/api/auth/orcid/callback`);
-    const scopes = encodeURIComponent('/authenticate /read-limited');
+    const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/orcid/callback`);
+    const scopes = encodeURIComponent('/authenticate');
     const orcidUrl = `https://orcid.org/oauth/authorize?client_id=${clientId}&response_type=code&scope=${scopes}&redirect_uri=${redirectUri}`;
     window.location.href = orcidUrl;
   };
@@ -84,21 +83,21 @@ export default function LoginPage() {
         {/* Right Side: Login Form */}
         <div className="w-full md:w-7/12 p-8 sm:p-12 lg:p-16 flex flex-col justify-center bg-white">
           <div className="max-w-md w-full mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Sign In</h3>
-            <p className="text-gray-500 mb-8 text-sm">Enter your email and password to access your account.</p>
+            <h3 className="text-2xl font-bold text-black mb-2">Sign In</h3>
+            <p className="text-black font-medium mb-8 text-sm">Enter your email and password to access your account.</p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700">Email Address</Label>
+                <Label htmlFor="email" className="text-black font-bold">Email Address</Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-4 w-4 text-gray-400" />
+                    <Mail className="h-4 w-4 text-black" />
                   </div>
-                  <Input 
+                  <input 
                     id="email" 
                     type="email" 
                     placeholder="Enter your email" 
-                    className="pl-10 h-12"
+                    className="pl-10 h-12 w-full border border-gray-200 rounded-lg text-black font-medium focus:outline-none focus:ring-2 focus:ring-[#004a99]/20 focus:border-[#004a99]"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required 
@@ -108,20 +107,20 @@ export default function LoginPage() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-gray-700">Password</Label>
-                  <Link href="#" className="text-sm font-medium text-[var(--mdpi-link-blue)] hover:underline">
+                  <Label htmlFor="password" className="text-black font-bold">Password</Label>
+                  <Link href="#" className="text-sm font-bold text-[var(--mdpi-link-blue)] hover:underline">
                     Forgot password?
                   </Link>
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-4 w-4 text-gray-400" />
+                    <Lock className="h-4 w-4 text-black" />
                   </div>
-                  <Input 
+                  <input 
                     id="password" 
                     type="password" 
                     placeholder="Enter your password" 
-                    className="pl-10 h-12"
+                    className="pl-10 h-12 w-full border border-gray-200 rounded-lg text-black font-medium focus:outline-none focus:ring-2 focus:ring-[#004a99]/20 focus:border-[#004a99]"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required 
@@ -129,29 +128,28 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full h-12 text-base font-medium mt-2">
+              <Button type="submit" className="w-full h-12 text-base font-bold mt-2">
                 Sign In
               </Button>
             </form>
 
             {/* Divider */}
             <div className="mt-8 flex items-center before:flex-1 before:border-t before:border-gray-200 after:flex-1 after:border-t after:border-gray-200">
-              <span className="px-4 text-sm text-gray-500 bg-white">Or continue with</span>
+              <span className="px-4 text-sm text-black font-bold bg-white">Or continue with</span>
             </div>
 
             {/* Alternative Logins - Future Placements */}
             <div className="mt-8 grid grid-cols-2 gap-4">
-              <Button type="button" variant="outline" className="h-12 w-full flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors">
+              <Button type="button" variant="outline" className="h-12 w-full flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors border-gray-200 text-black font-bold">
                 <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
                   <path d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z" fill="#EA4335" />
                   <path d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z" fill="#4285F4" />
                   <path d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z" fill="#FBBC05" />
-                  <path d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.26538 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z" fill="#34A853" />
+                  <path d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.095C13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.26538 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z" fill="#34A853" />
                 </svg>
                 Google
               </Button>
-              <Button type="button" onClick={handleOrcidLogin} variant="outline" className="h-12 w-full flex items-center justify-center gap-2 hover:bg-[#a6ce39]/10 hover:text-[#a6ce39] hover:border-[#a6ce39] transition-colors">
-                {/* ORCID Icon Approximation */}
+              <Button type="button" onClick={handleOrcidLogin} variant="outline" className="h-12 w-full flex items-center justify-center gap-2 hover:bg-[#a6ce39]/10 hover:text-[#a6ce39] hover:border-[#a6ce39] transition-colors border-gray-200 text-black font-bold">
                 <div className="w-5 h-5 rounded-full bg-[#A6CE39] flex items-center justify-center text-white font-bold text-[10px]">iD</div>
                 ORCID
               </Button>

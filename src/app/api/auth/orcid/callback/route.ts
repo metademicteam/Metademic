@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     params.append('client_secret', process.env.ORCID_CLIENT_SECRET!);
     params.append('grant_type', 'authorization_code');
     params.append('code', code);
-    params.append('redirect_uri', `http://127.0.0.1:3000/api/auth/orcid/callback`);
+    params.append('redirect_uri', `${origin}/api/auth/orcid/callback`);
 
     const tokenResponse = await fetch('https://orcid.org/oauth/token', {
       method: 'POST',
