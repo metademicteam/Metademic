@@ -92,7 +92,7 @@ const pageData: Record<string, { title: string, content: React.ReactNode, icon: 
             <>
                 <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Transparent Publishing Costs</h3>
                 <p className="mb-4 text-mdpi-gray-text">
-                    To provide open access, Metademic journals use a business model in which our expenses—including those of peer review, journal production, and online hosting and archiving—are recovered by charging an Article Processing Charge (APC) to the authors or their institutions. 
+                    To provide open access, Metademic journals use a business model in which our expenses—including those of peer review, journal production, and online hosting and archiving—are recovered by charging an Article Processing Charge (APC) to the authors or their institutions.
                 </p>
                 <p className="text-mdpi-gray-text font-bold">
                     There are no submission charges.
@@ -162,7 +162,7 @@ export default async function InformationPage({ params }: { params: Promise<{ sl
     return (
         <div className="min-h-screen flex flex-col bg-mdpi-gray-bg text-[14px]">
             <Navbar />
-            
+
             <div className="bg-gradient-to-r from-[#1a252f] to-mdpi-blue-dark py-12 text-white border-b-4 border-mdpi-blue">
                 <div className="max-w-[1280px] mx-auto px-4 flex items-center gap-4">
                     <div className="p-3 bg-white/10 rounded-lg">
@@ -177,17 +177,17 @@ export default async function InformationPage({ params }: { params: Promise<{ sl
                     <div className="w-full lg:w-[220px] flex-shrink-0">
                         <LeftSidebar />
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                         <div className="bg-white p-8 rounded border border-mdpi-border shadow-sm">
                             {pageInfo.content}
-                            
+
                             <div className="mt-8 pt-6 border-t border-mdpi-border bg-mdpi-gray-bg/50 p-4 rounded text-[13px] text-mdpi-gray-text">
                                 <strong>Need further assistance?</strong> Contact our support team at <a href="mailto:support@metademic.com" className="text-mdpi-link-blue hover:underline">support@metademic.com</a>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="w-full lg:w-[260px] flex-shrink-0">
                         <RightSidebar />
                     </div>

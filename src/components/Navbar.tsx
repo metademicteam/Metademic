@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { ChevronDown, Menu, X, User, LogOut, FilePlus } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 import { User as SupabaseUser } from '@supabase/supabase-js'
 
@@ -66,6 +66,15 @@ export default function Navbar() {
     const [user, setUser] = useState<SupabaseUser | null>(null)
     const supabase = createClient()
     const router = useRouter()
+    const pathname = usePathname()
+
+    const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+        // If the link points to the current page, scroll to top
+        if (pathname === href) {
+            e.preventDefault()
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+    }
 
     useEffect(() => {
         const getUser = async () => {
@@ -92,7 +101,11 @@ export default function Navbar() {
             <div className="max-w-[1280px] mx-auto px-4">
                 <div className="flex items-center justify-between h-[56px]">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-1 no-underline flex-shrink-0">
+                    <Link 
+                        href="/" 
+                        onClick={(e) => handleLinkClick(e, '/')}
+                        className="flex items-center gap-1 no-underline flex-shrink-0"
+                    >
                         <div className="w-[42px] h-[36px] bg-mdpi-blue rounded-[3px] flex items-center justify-center text-white font-extrabold text-[25px] tracking-wide border-2 border-mdpi-blue-dark">
                             M
                         </div>
@@ -104,6 +117,7 @@ export default function Navbar() {
                             <div key={link.label} className="relative group">
                                 <Link
                                     href={link.href}
+                                    onClick={(e) => handleLinkClick(e, link.href)}
                                     className="flex items-center gap-0.5 px-3 py-2 text-[14px] font-medium text-mdpi-text-dark hover:text-mdpi-blue no-underline transition-colors"
                                 >
                                     {link.label}
@@ -117,6 +131,7 @@ export default function Navbar() {
                                                 <Link
                                                     key={item.label}
                                                     href={item.href}
+                                                    onClick={(e) => handleLinkClick(e, item.href)}
                                                     className="block px-4 py-2.5 text-[13px] text-mdpi-text-dark hover:bg-mdpi-blue/5 hover:text-mdpi-blue no-underline transition-colors border-l-[3px] border-transparent hover:border-mdpi-blue"
                                                 >
                                                     {item.label}
@@ -190,7 +205,10 @@ export default function Navbar() {
                                 <Link
                                     href={link.href}
                                     className="grow py-2 px-3 text-[14px] font-medium text-mdpi-text-dark hover:bg-mdpi-gray-bg rounded no-underline"
-                                    onClick={() => setMobileOpen(false)}
+                                    onClick={(e) => {
+                                        setMobileOpen(false)
+                                        handleLinkClick(e, link.href)
+                                    }}
                                 >
                                     {link.label}
                                 </Link>
@@ -211,7 +229,10 @@ export default function Navbar() {
                                             key={item.label}
                                             href={item.href}
                                             className="py-2 text-[13px] text-mdpi-gray-text hover:text-mdpi-blue no-underline"
-                                            onClick={() => setMobileOpen(false)}
+                                            onClick={(e) => {
+                                                setMobileOpen(false)
+                                                handleLinkClick(e, item.href)
+                                            }}
                                         >
                                             {item.label}
                                         </Link>
