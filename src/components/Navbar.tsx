@@ -9,16 +9,60 @@ import { useRouter } from 'next/navigation'
 import { User as SupabaseUser } from '@supabase/supabase-js'
 
 const navLinks = [
-    { label: 'Journals', href: '/journals', hasDropdown: true },
-    { label: 'Topics', href: '/topics', hasDropdown: true },
-    { label: 'Information', href: '/information', hasDropdown: true },
-    { label: 'Author Services', href: '/author-services', hasDropdown: true },
-    { label: 'Initiatives', href: '/initiatives', hasDropdown: true },
-    { label: 'About', href: '/about', hasDropdown: false },
+    {
+        label: 'Journals',
+        href: '/journals',
+        hasDropdown: true,
+        dropdownItems: [
+            { label: 'Active Journals', href: '/journals/active' },
+            { label: 'Find a Journal', href: '/journals/find' },
+            { label: 'Journal Proposal', href: '/journals/proposal' },
+            { label: 'Proceedings Series', href: '/journals/proceedings' },
+        ]
+    },
+    { label: 'Topics', href: '/topics', hasDropdown: false },
+    {
+        label: 'Information',
+        href: '/information',
+        hasDropdown: true,
+        dropdownItems: [
+            { label: 'For Authors', href: '/information/authors' },
+            { label: 'For Reviewers', href: '/information/reviewers' },
+            { label: 'For Editors', href: '/information/editors' },
+            { label: 'For Librarians', href: '/information/librarians' },
+            { label: 'For Publishers', href: '/information/publishers' },
+            { label: 'For Societies', href: '/information/societies' },
+            { label: 'For Conference Organizers', href: '/information/conference-organizers' },
+            { label: 'Open Access Policy', href: '/information/open-access-policy' },
+            { label: 'Institutional Open Access Program', href: '/information/institutional-open-access-program' },
+            { label: 'Special Issues Guidelines', href: '/information/special-issues-guidelines' },
+            { label: 'Editorial Process', href: '/information/editorial-process' },
+            { label: 'Research and Publication Ethics', href: '/information/research-and-publication-ethics' },
+            { label: 'Article Processing Charges', href: '/information/article-processing-charges' },
+            { label: 'Awards', href: '/information/awards' },
+            { label: 'Testimonials', href: '/information/testimonials' },
+        ]
+    },
+    { label: 'Author Services', href: '/author-services', hasDropdown: false },
+    { label: 'Initiatives', href: '/initiatives', hasDropdown: false },
+    {
+        label: 'About',
+        href: '/about',
+        hasDropdown: true,
+        dropdownItems: [
+            { label: 'Overview', href: '/about/overview' },
+            { label: 'Contact', href: '/about/contact' },
+            { label: 'Careers', href: '/about/careers' },
+            { label: 'News', href: '/about/news' },
+            { label: 'Press', href: '/about/press' },
+            { label: 'Blog', href: '/about/blog' },
+        ]
+    },
 ]
 
 export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false)
+    const [activeMobileDropdown, setActiveMobileDropdown] = useState<string | null>(null)
     const [user, setUser] = useState<SupabaseUser | null>(null)
     const supabase = createClient()
     const router = useRouter()
@@ -63,8 +107,24 @@ export default function Navbar() {
                                     className="flex items-center gap-0.5 px-3 py-2 text-[14px] font-medium text-mdpi-text-dark hover:text-mdpi-blue no-underline transition-colors"
                                 >
                                     {link.label}
-                                    {link.hasDropdown && <ChevronDown size={13} className="ml-0.5 opacity-50" />}
+                                    {link.hasDropdown && <ChevronDown size={13} className="ml-0.5 opacity-50 group-hover:rotate-180 transition-transform" />}
                                 </Link>
+
+                                {link.hasDropdown && (
+                                    <div className="absolute left-0 top-full pt-1 hidden group-hover:block z-[100]">
+                                        <div className="bg-white border border-mdpi-border shadow-2xl rounded-md py-2 min-w-[240px] overflow-hidden">
+                                            {link.dropdownItems?.map((item) => (
+                                                <Link
+                                                    key={item.label}
+                                                    href={item.href}
+                                                    className="block px-4 py-2.5 text-[13px] text-mdpi-text-dark hover:bg-mdpi-blue/5 hover:text-mdpi-blue no-underline transition-colors border-l-[3px] border-transparent hover:border-mdpi-blue"
+                                                >
+                                                    {item.label}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -125,33 +185,59 @@ export default function Navbar() {
             {mobileOpen && (
                 <div className="lg:hidden bg-white border-t border-mdpi-border px-4 py-4 space-y-2 shadow-lg">
                     {navLinks.map((link) => (
-                        <Link
-                            key={link.label}
-                            href={link.href}
-                            className="block py-2 px-3 text-[14px] font-medium text-mdpi-text-dark hover:bg-mdpi-gray-bg rounded no-underline"
-                            onClick={() => setMobileOpen(false)}
-                        >
-                            {link.label}
-                        </Link>
+                        <div key={link.label}>
+                            <div className="flex items-center justify-between">
+                                <Link
+                                    href={link.href}
+                                    className="grow py-2 px-3 text-[14px] font-medium text-mdpi-text-dark hover:bg-mdpi-gray-bg rounded no-underline"
+                                    onClick={() => setMobileOpen(false)}
+                                >
+                                    {link.label}
+                                </Link>
+                                {link.hasDropdown && (
+                                    <button 
+                                        onClick={() => setActiveMobileDropdown(activeMobileDropdown === link.label ? null : link.label)}
+                                        className="p-2 text-mdpi-gray-text hover:text-mdpi-blue"
+                                    >
+                                        <ChevronDown size={18} className={`transition-transform duration-200 ${activeMobileDropdown === link.label ? 'rotate-180' : ''}`} />
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {link.hasDropdown && activeMobileDropdown === link.label && (
+                                <div className="ml-4 pl-3 border-l-2 border-mdpi-blue/20 flex flex-col gap-1 mt-1 mb-2">
+                                    {link.dropdownItems?.map((item) => (
+                                        <Link
+                                            key={item.label}
+                                            href={item.href}
+                                            className="py-2 text-[13px] text-mdpi-gray-text hover:text-mdpi-blue no-underline"
+                                            onClick={() => setMobileOpen(false)}
+                                        >
+                                            {item.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     ))}
                     <div className="pt-3 mt-3 border-t border-mdpi-border flex flex-col gap-2">
                         {user ? (
                             <>
-                                <Link 
-                                    href="/user/edit" 
+                                <Link
+                                    href="/user/edit"
                                     className="text-center py-2 text-[13px] font-medium text-mdpi-text-dark border border-mdpi-border rounded no-underline"
                                     onClick={() => setMobileOpen(false)}
                                 >
                                     Profile
                                 </Link>
-                                <Link 
-                                    href="/user/submit" 
+                                <Link
+                                    href="/user/submit"
                                     className="text-center py-2 text-[13px] font-bold text-white bg-mdpi-blue rounded no-underline"
                                     onClick={() => setMobileOpen(false)}
                                 >
                                     Submit
                                 </Link>
-                                <button 
+                                <button
                                     onClick={handleSignOut}
                                     className="text-center py-2 text-[13px] font-medium text-red-600 border border-red-100 rounded no-underline"
                                 >
@@ -160,15 +246,15 @@ export default function Navbar() {
                             </>
                         ) : (
                             <>
-                                <Link 
-                                    href="/login" 
+                                <Link
+                                    href="/login"
                                     className="text-center py-2 text-[13px] font-medium text-mdpi-blue border border-mdpi-blue rounded no-underline"
                                     onClick={() => setMobileOpen(false)}
                                 >
                                     Sign In / Sign Up
                                 </Link>
-                                <Link 
-                                    href="/submit" 
+                                <Link
+                                    href="/submit"
                                     className="text-center py-2 text-[13px] font-bold text-white bg-mdpi-blue rounded no-underline"
                                     onClick={() => setMobileOpen(false)}
                                 >
