@@ -61,7 +61,7 @@ export default function FindJournalPage() {
                                     <div className="pt-6 border-t border-mdpi-border">
                                         <h3 className="text-[18px] font-bold text-mdpi-text-dark mb-5 flex items-center gap-2">
                                             Search Criteria & Filters
-                                            <Info size={16} className="text-mdpi-gray-text cursor-help" title="Refine your search with metrics and indexing requirements" />
+                                            <span title="Refine your search with metrics and indexing requirements" className="cursor-help inline-flex"><Info size={16} className="text-mdpi-gray-text" /></span>
                                         </h3>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -124,7 +124,7 @@ export default function FindJournalPage() {
                             <div className="bg-white border-l-4 border-mdpi-blue p-5 rounded shadow-sm hover:shadow-md transition-shadow">
                                 <h4 className="font-extrabold text-mdpi-text-dark mb-2 text-[15px]">Advanced AI Matching</h4>
                                 <p className="text-mdpi-gray-text text-[13px] leading-relaxed">
-                                    Our matching engine uses state-of-the-art Natural Language Processing (NLP) to analyze your abstract's semantic meaning and scientific context, comparing it against the Aims & Scope of our entire journal portfolio.
+                                    Our matching engine uses state-of-the-art Natural Language Processing (NLP) to analyze your abstract&apos;s semantic meaning and scientific context, comparing it against the Aims & Scope of our entire journal portfolio.
                                 </p>
                             </div>
                             <div className="bg-white border-l-4 border-mdpi-green p-5 rounded shadow-sm hover:shadow-md transition-shadow">

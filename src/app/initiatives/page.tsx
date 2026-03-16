@@ -2,8 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
-import { TreePine, LockOpen, GraduationCap, Leaf, Presentation, Lightbulb } from 'lucide-react';
-import Image from "next/image";
+import { TreePine, LockOpen, Presentation, Lightbulb } from 'lucide-react';
 
 export const revalidate = 86400; // ISR validation every 24 hours
 

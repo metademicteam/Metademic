@@ -3,11 +3,10 @@ import Footer from "@/components/Footer";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import { Info, Mail, Briefcase, Newspaper, Camera, Edit3 } from 'lucide-react';
-import { notFound } from "next/navigation";
 
 export const revalidate = 86400; // ISR validation every 24 hours
 
-const pageData: Record<string, { title: string, content: React.ReactNode, icon: any }> = {
+const pageData: Record<string, { title: string, content: React.ReactNode, icon: React.ElementType }> = {
     'overview': {
         title: "Overview",
         icon: Info,
@@ -147,7 +146,7 @@ export default async function AboutPage({ params }: { params: Promise<{ slug: st
                     </div>
                     <h1 className="text-4xl md:text-5xl font-extrabold capitalize mb-4 tracking-tight">{pageInfo.title}</h1>
                     <p className="text-[16px] text-white/70">
-                        Learn more about Metademic's heritage, services, and commitment to the academic community.
+                        Learn more about Metademic&apos;s heritage, services, and commitment to the academic community.
                     </p>
                 </div>
             </div>

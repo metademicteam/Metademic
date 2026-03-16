@@ -3,11 +3,10 @@ import Footer from "@/components/Footer";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import { Info, BookOpen, Users, DollarSign, Award, ShieldCheck } from 'lucide-react';
-import { notFound } from "next/navigation";
 
 export const revalidate = 86400; // ISR validation every 24 hours
 
-const pageData: Record<string, { title: string, content: React.ReactNode, icon: any }> = {
+const pageData: Record<string, { title: string, content: React.ReactNode, icon: React.ElementType }> = {
     'authors': {
         title: "Information for Authors",
         icon: Users,
@@ -40,7 +39,7 @@ const pageData: Record<string, { title: string, content: React.ReactNode, icon: 
                 <ul className="list-disc pl-6 mb-4 text-mdpi-gray-text space-y-2">
                     <li>Receive discount vouchers for future APCs when you submit your own papers.</li>
                     <li>Personalized reviewer certificates.</li>
-                    <li>Acknowledgment in the journal's annual reviewer list.</li>
+                    <li>Acknowledgment in the journal&apos;s annual reviewer list.</li>
                 </ul>
             </>
         )
@@ -81,7 +80,7 @@ const pageData: Record<string, { title: string, content: React.ReactNode, icon: 
                 <ul className="list-disc pl-6 mb-4 text-mdpi-gray-text space-y-2">
                     <li>Everyone has free and unlimited access to the full-text of all articles published in Metademic journals.</li>
                     <li>Everyone is free to re-use the published material given proper accreditation/citation.</li>
-                    <li>Open access publication is supported by the authors' institutes or research funding agencies.</li>
+                    <li>Open access publication is supported by the authors&apos; institutes or research funding agencies.</li>
                 </ul>
             </>
         )
@@ -123,8 +122,8 @@ const pageData: Record<string, { title: string, content: React.ReactNode, icon: 
 };
 
 // Extraneous icons for demo
-function LibraryIcon(props: any) { return <BookOpen {...props} /> }
-function GlobeIcon(props: any) { return <Info {...props} /> }
+function LibraryIcon(props: React.ComponentProps<typeof BookOpen>) { return <BookOpen {...props} /> }
+function GlobeIcon(props: React.ComponentProps<typeof Info>) { return <Info {...props} /> }
 
 export function generateStaticParams() {
     return [
