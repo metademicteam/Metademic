@@ -35,7 +35,7 @@ const journalDatabase: Record<string, {
         issn: "2071-1050",
         impactFactor: "3.8",
         citeScore: "5.8",
-        apc: "2400 CHF",
+        apc: "2400 USD",
         color: "#4caf50",
         description: "Sustainability is an international, cross-disciplinary, scholarly, peer-reviewed and open access journal of environmental, cultural, economic, and social sustainability of human beings.",
         aims: [
@@ -52,7 +52,7 @@ const journalDatabase: Record<string, {
         issn: "1424-8220",
         impactFactor: "3.9",
         citeScore: "7.3",
-        apc: "2600 CHF",
+        apc: "2600 USD",
         color: "#ff9800",
         description: "Sensors is the leading international, peer-reviewed, open access journal on the science and technology of sensors. Sensors is published semimonthly online by Metademic.",
         aims: [
@@ -69,7 +69,7 @@ const journalDatabase: Record<string, {
         issn: "1422-0067",
         impactFactor: "5.6",
         citeScore: "7.8",
-        apc: "2900 CHF",
+        apc: "2900 USD",
         color: "#9c27b0",
         description: "International Journal of Molecular Sciences is an international, peer-reviewed, open access journal providing an advanced forum for biochemistry, molecular and cell biology, molecular biophysics, molecular medicine, and all aspects of molecular research in chemistry.",
         aims: [
@@ -86,7 +86,7 @@ const journalDatabase: Record<string, {
         issn: "2072-6694",
         impactFactor: "5.2",
         citeScore: "7.4",
-        apc: "2900 CHF",
+        apc: "2900 USD",
         color: "#f44336",
         description: "Cancers is a peer-reviewed, open access journal of oncology. It publishes research papers, reviews, editorials, communications, and short notes.",
         aims: [
@@ -103,7 +103,7 @@ const journalDatabase: Record<string, {
         issn: "2076-3417",
         impactFactor: "2.7",
         citeScore: "4.5",
-        apc: "2400 CHF",
+        apc: "2400 USD",
         color: "#e91e63",
         description: "Applied Sciences is an international, peer-reviewed, open access journal on all aspects of applied natural sciences published semimonthly online by Metademic.",
         aims: [

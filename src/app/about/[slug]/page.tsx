@@ -14,7 +14,7 @@ const pageData: Record<string, { title: string, content: React.ReactNode, icon: 
             <>
                 <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">About Metademic</h3>
                 <p className="mb-4 text-mdpi-gray-text leading-relaxed">
-                    A pioneer in scholarly, open access publishing, Metademic has supported academic communities since its inception. Based in Switzerland with editorial and production teams around the world, Metademic pursues its mission to foster open scientific exchange across all disciplines.
+                    A pioneer in scholarly, open access publishing, Metademic has supported academic communities since its inception. Based in Dhaka, Bangladesh with editorial and production teams around the world, Metademic pursues its mission to foster open scientific exchange across all disciplines.
                 </p>
                 <h4 className="font-bold mb-2">Our Mission</h4>
                 <p className="mb-4 text-mdpi-gray-text leading-relaxed">
@@ -36,8 +36,8 @@ const pageData: Record<string, { title: string, content: React.ReactNode, icon: 
                     <div>
                         <h5 className="font-bold text-mdpi-text-dark">Editorial Office</h5>
                         <p className="text-mdpi-gray-text mt-2 text-[13px]">
-                            St. Alban-Anlage 66<br />
-                            4052 Basel, Switzerland<br />
+                            House 12, Road 4, Dhanmondi<br />
+                            Dhaka 1205, Bangladesh<br />
                             <a href="mailto:support@metademic.com" className="text-mdpi-blue hover:underline">support@metademic.com</a>
                         </p>
                     </div>

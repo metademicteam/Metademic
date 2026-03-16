@@ -71,7 +71,7 @@ export default function AboutLandingPage() {
                             About Metademic
                         </h1>
                         <p className="text-[17px] text-white/80 leading-relaxed mb-6">
-                            A pioneer in scholarly, open access publishing, Metademic has supported academic communities since its inception. Based in Switzerland with editorial and production teams worldwide, we are dedicated to fostering open scientific exchange across all disciplines.
+                            A pioneer in scholarly, open access publishing, Metademic has supported academic communities since its inception. Based in Dhaka, Bangladesh with editorial and production teams worldwide, we are dedicated to fostering open scientific exchange across all disciplines.
                         </p>
                         <div className="flex gap-4">
                             <Link 
