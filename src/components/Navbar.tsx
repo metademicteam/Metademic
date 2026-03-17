@@ -1,10 +1,13 @@
 'use client'
 
+import React from 'react'
+
 import Link from 'next/link'
 import { ChevronDown, Menu, X, User, LogOut, FilePlus } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter, usePathname } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 
 import { User as SupabaseUser } from '@supabase/supabase-js'
 
@@ -63,10 +66,20 @@ const navLinks = [
 export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false)
     const [activeMobileDropdown, setActiveMobileDropdown] = useState<string | null>(null)
+    const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+    const linkRefs = React.useRef<Record<string, HTMLAnchorElement | null>>({})
     const [user, setUser] = useState<SupabaseUser | null>(null)
     const supabase = createClient()
     const router = useRouter()
     const pathname = usePathname()
+
+    const handleDropdownEnter = (label: string) => {
+        setActiveDropdown(label)
+    }
+
+    const handleDropdownLeave = () => {
+        setActiveDropdown(null)
+    }
 
     const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
         // If the link points to the current page, scroll to top
@@ -112,34 +125,140 @@ export default function Navbar() {
                     </Link>
 
                     {/* Desktop Nav Links */}
-                    <div className="hidden lg:flex items-center gap-1 ml-6">
+                    <div className="hidden lg:flex items-center gap-1 ml-6 h-full">
                         {navLinks.map((link) => (
-                            <div key={link.label} className="relative group">
+                            <div
+                                key={link.label}
+                                className="dropdown-wrapper relative h-full flex items-center"
+                                onMouseEnter={() => link.hasDropdown && handleDropdownEnter(link.label)}
+                                onMouseLeave={handleDropdownLeave}
+                            >
                                 <Link
                                     href={link.href}
+                                    ref={(el) => { linkRefs.current[link.label] = el }}
                                     onClick={(e) => handleLinkClick(e, link.href)}
-                                    className="flex items-center gap-0.5 px-3 py-2 text-[14px] font-medium text-mdpi-text-dark hover:text-mdpi-blue no-underline transition-colors"
+                                    className="flex items-center gap-0.5 px-3 py-2 text-[14px] font-semibold text-[#000000] hover:text-mdpi-blue no-underline transition-colors relative"
                                 >
                                     {link.label}
-                                    {link.hasDropdown && <ChevronDown size={13} className="ml-0.5 opacity-50 group-hover:rotate-180 transition-transform" />}
+                                    {link.hasDropdown && (
+                                        <ChevronDown
+                                            size={13}
+                                            className={`ml-0.5 opacity-50 transition-transform duration-300 ${
+                                                activeDropdown === link.label ? 'rotate-180' : ''
+                                            }`}
+                                        />
+                                    )}
+                                    {/* Hover underline effect */}
+                                    <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-mdpi-blue transition-transform origin-left duration-300 ${
+                                        activeDropdown === link.label ? 'scale-x-100' : 'scale-x-0'
+                                    }`}></span>
                                 </Link>
 
-                                {link.hasDropdown && (
-                                    <div className="absolute left-0 top-full pt-1 hidden group-hover:block z-[100]">
-                                        <div className="bg-white border border-mdpi-border shadow-2xl rounded-md py-2 min-w-[240px] overflow-hidden">
-                                            {link.dropdownItems?.map((item) => (
-                                                <Link
-                                                    key={item.label}
-                                                    href={item.href}
-                                                    onClick={(e) => handleLinkClick(e, item.href)}
-                                                    className="block px-4 py-2.5 text-[13px] text-mdpi-text-dark hover:bg-mdpi-blue/5 hover:text-mdpi-blue no-underline transition-colors border-l-[3px] border-transparent hover:border-mdpi-blue"
-                                                >
-                                                    {item.label}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                                 <AnimatePresence>
+                                    {link.hasDropdown && activeDropdown === link.label && (
+                                        <motion.div
+                                            key={link.label}
+                                            initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                                            transition={{ duration: 0.18, ease: 'easeOut' }}
+                                            className={`
+                                                absolute top-full pt-3 z-[100]
+                                                ${link.label === 'Information'
+                                                    ? 'left-1/2 -translate-x-1/2'
+                                                    : 'left-1/2 -translate-x-1/2'
+                                                }
+                                            `}
+                                        >
+                                            {/* Arrow centered under the link text */}
+                                            <div className="flex justify-center">
+                                                <div className="w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-b-[9px] border-b-[#32394d]"></div>
+                                            </div>
+
+                                            <div className={`
+                                                bg-[#32394d] text-white
+                                                shadow-[0_24px_60px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden
+                                                ${link.label === 'Information' ? 'w-[700px]' : 'min-w-[260px]'}
+                                            `}>
+                                                {link.label === 'Information' ? (
+                                                    <div className="px-6 pt-5 pb-4">
+                                                        {/* Header */}
+                                                        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/10">
+                                                            <div className="w-2 h-2 rounded-full bg-mdpi-blue"></div>
+                                                            <span className="text-[11px] font-extrabold text-white/50 uppercase tracking-[2px]">Information & Resources</span>
+                                                        </div>
+                                                        {/* 3 columns */}
+                                                        <div className="grid grid-cols-3 gap-x-4">
+                                                            {/* Col 1: For Authors → For Publishers */}
+                                                            <div>
+                                                                <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">For Stakeholders</p>
+                                                                {link.dropdownItems?.slice(0, 5).map((item) => (
+                                                                    <Link
+                                                                        key={item.label}
+                                                                        href={item.href}
+                                                                        onClick={(e) => { handleLinkClick(e, item.href); setActiveDropdown(null) }}
+                                                                        className="group/item flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium text-white/80 hover:bg-white/10 hover:text-white no-underline transition-all rounded-md"
+                                                                    >
+                                                                        <span className="w-1 h-1 rounded-full bg-white/30 group-hover/item:bg-mdpi-blue-light flex-shrink-0 transition-colors"></span>
+                                                                        {item.label}
+                                                                    </Link>
+                                                                ))}
+                                                            </div>
+                                                            {/* Col 2: For Societies → Institutional Open Access */}
+                                                            <div>
+                                                                <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">Community & Access</p>
+                                                                {link.dropdownItems?.slice(5, 10).map((item) => (
+                                                                    <Link
+                                                                        key={item.label}
+                                                                        href={item.href}
+                                                                        onClick={(e) => { handleLinkClick(e, item.href); setActiveDropdown(null) }}
+                                                                        className="group/item flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium text-white/80 hover:bg-white/10 hover:text-white no-underline transition-all rounded-md"
+                                                                    >
+                                                                        <span className="w-1 h-1 rounded-full bg-white/30 group-hover/item:bg-mdpi-blue-light flex-shrink-0 transition-colors"></span>
+                                                                        {item.label}
+                                                                    </Link>
+                                                                ))}
+                                                            </div>
+                                                            {/* Col 3: Special Issues → Testimonials */}
+                                                            <div>
+                                                                <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">Policies & More</p>
+                                                                {link.dropdownItems?.slice(10).map((item) => (
+                                                                    <Link
+                                                                        key={item.label}
+                                                                        href={item.href}
+                                                                        onClick={(e) => { handleLinkClick(e, item.href); setActiveDropdown(null) }}
+                                                                        className="group/item flex items-center gap-2 px-2 py-1.5 text-[13px] font-medium text-white/80 hover:bg-white/10 hover:text-white no-underline transition-all rounded-md"
+                                                                    >
+                                                                        <span className="w-1 h-1 rounded-full bg-white/30 group-hover/item:bg-mdpi-blue-light flex-shrink-0 transition-colors"></span>
+                                                                        {item.label}
+                                                                    </Link>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col px-3 py-4 gap-0.5">
+                                                        <h4 className="text-[11px] font-extrabold text-white/40 uppercase tracking-[2px] mb-3 px-3 flex items-center gap-2">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-mdpi-blue"></div>
+                                                            {link.label}
+                                                        </h4>
+                                                        {link.dropdownItems?.map((item) => (
+                                                            <Link
+                                                                key={item.label}
+                                                                href={item.href}
+                                                                onClick={(e) => { handleLinkClick(e, item.href); setActiveDropdown(null) }}
+                                                                className="group/item flex items-center justify-between px-3 py-2.5 text-[14px] font-medium text-white/85 hover:bg-white/10 hover:text-white no-underline transition-all rounded-lg"
+                                                            >
+                                                                {item.label}
+                                                                <span className="opacity-0 group-hover/item:opacity-100 transition-all translate-x-[-6px] group-hover/item:translate-x-0">→</span>
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         ))}
                     </div>
