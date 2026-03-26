@@ -1,24 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-
-const newsItems = [
-    {
-        date: '4 March 2026',
-        title: "Metademic's 2025 Best Paper Awards — Award-Winning Papers Announced",
-        href: '#',
-    },
-    {
-        date: '4 March 2026',
-        title: 'International Women\'s Day — "Give to Gain"',
-        href: '#',
-    },
-    {
-        date: '28 February 2026',
-        title: 'METADEMIC INSIGHTS: The CEO\'s Letter #32 - Metademic China and Thailand, 1,000 Partnerships, R2R',
-        href: '#',
-    },
-]
+import { useAppData } from '@/context/AppContext'
 
 const blogPosts = [
     {
@@ -33,28 +16,30 @@ const blogPosts = [
     },
 ]
 
-const specialIssues = [
-    {
-        title: 'New Perspectives in the Management and Monitoring of Mountain Ecosystems',
-        journal: 'Sustainability',
-        deadline: '30 April 2026',
-        href: '#',
-    },
-    {
-        title: 'Machine Learning Applications in Healthcare: Current Trends and Future Directions',
-        journal: 'Applied Sciences',
-        deadline: '15 May 2026',
-        href: '#',
-    },
-    {
-        title: 'Fractional Calculus, Quantum Calculus and Special Functions in Complex Analysis',
-        journal: 'Mathematics',
-        deadline: '30 June 2026',
-        href: '#',
-    },
-]
-
 export default function RightSidebar() {
+    const appData = useAppData();
+    const newsItems = appData?.newsItems || [
+        {
+            date: '4 March 2026',
+            title: "Metademic's 2025 Best Paper Awards — Award-Winning Papers Announced",
+            href: '#',
+        },
+        {
+            date: '17 March 2026',
+            title: 'International Women\'s Day — "Give to Gain"',
+            href: '#',
+        },
+    ];
+    
+    const specialIssues = appData?.specialIssues || [
+        {
+            title: 'New Perspectives in the Management and Monitoring of Mountain Ecosystems',
+            journal: 'Sustainability',
+            deadline: '30 April 2026',
+            href: '#',
+        },
+    ];
+
     return (
         <aside className="space-y-6">
             {/* News */}

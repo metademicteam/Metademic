@@ -3,18 +3,44 @@ import Footer from "@/components/Footer";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import { Search, ChevronRight, Layers, Box, Tag } from 'lucide-react';
+import { createClient } from "@/utils/supabase/server";
+import Link from "next/link";
 
 export const revalidate = 86400; // ISR validation every 24 hours
 
-const topicsData = [
-    { id: 1, title: 'Advancements in Artificial Intelligence and Machine Learning', articles: 124, journals: 5, status: 'Open' },
-    { id: 2, title: 'Climate Change Adaptation Strategies for Coastal Megacities', articles: 87, journals: 3, status: 'Open' },
-    { id: 3, title: 'Novel Biomaterials in Regenerative Medicine', articles: 210, journals: 4, status: 'Closing Soon' },
-    { id: 4, title: 'Sustainable Agriculture and Smart Farming Technologies', articles: 156, journals: 6, status: 'Open' },
-    { id: 5, title: 'Next-Generation Battery Technologies for Electric Vehicles', articles: 342, journals: 7, status: 'Closed' },
-];
+export default async function TopicsPage() {
+    const supabase = await createClient();
 
-export default function TopicsPage() {
+    // Fetch Special Issues as Topics
+    const { data: specialIssues, count: totalTopics } = await supabase
+        .from("special_issues")
+        .select(`
+            id,
+            title,
+            slug,
+            deadline,
+            is_open,
+            journal:journals (
+                title
+            )
+        `, { count: 'exact' })
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+    const topics = (specialIssues || []).map(issue => {
+        const journalTitle = (issue.journal as unknown as { title: string }[])?.[0]?.title || "Multiple Journals";
+            
+        return {
+            id: issue.id,
+            title: issue.title,
+            slug: issue.slug,
+            journal: journalTitle,
+            status: issue.is_open ? (new Date(issue.deadline || '') < new Date() ? 'Closing Soon' : 'Open') : 'Closed',
+            articles: 15, // Static mock for now
+            journals: 1
+        };
+    });
+
     return (
         <div className="min-h-screen flex flex-col bg-mdpi-gray-bg text-[14px]">
             <Navbar />
@@ -27,11 +53,11 @@ export default function TopicsPage() {
                         <p className="text-[15px] text-mdpi-gray-text leading-relaxed mb-6">
                             Multidisciplinary collaborative environments curated by leading experts. Topics group articles across multiple Metademic journals focusing on a specific research area, maximizing visibility and interconnectedness.
                         </p>
-                        <div className="relative">
+                        <form className="relative">
                             <input type="text" placeholder="Search Topics..." className="w-full px-4 py-3 pl-12 border border-mdpi-border rounded-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-mdpi-blue/20 focus:border-mdpi-blue transition-all" />
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-mdpi-gray-text" size={20} />
-                            <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-mdpi-blue hover:bg-mdpi-blue-dark text-white px-4 py-1.5 rounded transition-colors text-[13px] font-bold">Search</button>
-                        </div>
+                            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-mdpi-blue hover:bg-mdpi-blue-dark text-white px-4 py-1.5 rounded transition-colors text-[13px] font-bold">Search</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -53,13 +79,13 @@ export default function TopicsPage() {
                             </div>
 
                             <div className="space-y-4">
-                                {topicsData.map(topic => (
-                                    <div key={topic.id} className="group border border-mdpi-border rounded hover:border-mdpi-blue hover:shadow-md transition-all p-5 flex flex-col sm:flex-row gap-4 justify-between bg-white relative overflow-hidden">
+                                {topics.length > 0 ? topics.map(topic => (
+                                    <Link key={topic.id} href={`/special-issues/${topic.slug}`} className="group border border-mdpi-border rounded hover:border-mdpi-blue hover:shadow-md transition-all p-5 flex flex-col sm:flex-row gap-4 justify-between bg-white relative overflow-hidden no-underline">
                                         <div className="w-1 absolute left-0 top-0 bottom-0 bg-mdpi-blue scale-y-0 group-hover:scale-y-100 transition-transform origin-bottom"></div>
-                                        <div className="flex-1 pl-2">
+                                        <div className="flex-1 pl-2 text-left">
                                             <div className="flex items-center gap-3 mb-2 flex-wrap">
                                                 <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded tracking-wider ${topic.status === 'Open' ? 'bg-mdpi-green/10 text-mdpi-green' : topic.status === 'Closed' ? 'bg-gray-100 text-gray-500' : 'bg-orange-100 text-orange-600'}`}>{topic.status}</span>
-                                                <span className="text-[12px] text-mdpi-gray-text flex items-center gap-1"><Tag size={12} /> Topic Board</span>
+                                                <span className="text-[12px] text-mdpi-gray-text flex items-center gap-1"><Tag size={12} /> {topic.journal}</span>
                                             </div>
                                             <h3 className="font-bold text-[16px] text-mdpi-text-dark group-hover:text-mdpi-blue transition-colors mb-2 cursor-pointer leading-tight pr-4">
                                                 {topic.title}
@@ -67,15 +93,16 @@ export default function TopicsPage() {
                                         </div>
                                         <div className="flex flex-col sm:items-end justify-center min-w-[140px] gap-2 pt-4 sm:pt-0 border-t sm:border-t-0 border-mdpi-border sm:pl-4 pl-2 text-mdpi-gray-text text-[12px]">
                                             <div className="flex items-center gap-2"><strong>{topic.articles}</strong> Articles</div>
-                                            <div className="flex items-center gap-2"><strong>{topic.journals}</strong> Participating Journals</div>
                                             <button className="flex items-center gap-1 text-mdpi-blue font-bold mt-1 group-hover:underline">View Topic <ChevronRight size={14} /></button>
                                         </div>
-                                    </div>
-                                ))}
+                                    </Link>
+                                )) : (
+                                    <div className="p-8 text-center text-mdpi-gray-text italic">No topics found.</div>
+                                )}
                             </div>
                             
                             <div className="mt-8 pt-4 border-t border-mdpi-border flex justify-between items-center text-[13px]">
-                                <span className="text-mdpi-gray-text">Showing 1-5 of 1,248 Topics</span>
+                                <span className="text-mdpi-gray-text">Showing {topics.length} of {totalTopics || 0} Topics</span>
                                 <button className="px-4 py-2 border border-mdpi-border rounded hover:bg-mdpi-gray-bg hover:text-mdpi-blue font-bold transition-all bg-white">Load More</button>
                             </div>
                         </div>

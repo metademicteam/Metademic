@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
+import { useAppData, Journal } from '@/context/AppContext'
 
 const journalColors: Record<string, string> = {
     'Sustainability': '#4caf50',
@@ -26,9 +27,15 @@ const journalColors: Record<string, string> = {
     'Healthcare': '#5c6bc0',
 }
 
-const journals = Object.keys(journalColors)
-
 export default function LeftSidebar() {
+    const appData = useAppData();
+    const journalsFromContext = appData?.journals;
+    
+    // Use dynamic journals from context, or fall back to keys from journalColors for initial look
+    const displayJournals: Journal[] = (journalsFromContext && journalsFromContext.length > 0)
+        ? journalsFromContext 
+        : Object.keys(journalColors).map(name => ({ id: name, title: name, slug: name.toLowerCase() }));
+
     return (
         <aside className="space-y-4">
             {/* Open Access Journals Header */}
@@ -40,8 +47,8 @@ export default function LeftSidebar() {
             <div className="relative">
                 <select className="w-full border border-mdpi-border rounded px-3 py-2 text-[13px] text-mdpi-gray-text bg-white focus:outline-none focus:border-mdpi-blue appearance-none pr-8">
                     <option>Find Journal...</option>
-                    {journals.map(j => (
-                        <option key={j}>{j}</option>
+                    {displayJournals.map((j: Journal) => (
+                        <option key={j.id}>{j.title}</option>
                     ))}
                 </select>
                 <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-mdpi-gray-text rotate-90" />
@@ -61,20 +68,20 @@ export default function LeftSidebar() {
 
             {/* Journal List */}
             <div className="space-y-0 border-t border-mdpi-border pt-2">
-                {journals.map((journal) => (
+                {displayJournals.map((journal: Journal) => (
                     <Link
-                        key={journal}
-                        href={`/journal/${journal.toLowerCase().replace(/\s+/g, '-')}`}
+                        key={journal.id}
+                        href={`/journals/${journal.slug}`}
                         className="flex items-center gap-3 py-2 px-1 hover:bg-mdpi-gray-bg rounded transition-colors no-underline group border-b border-mdpi-gray-light/50"
                     >
                         <div
                             className="journal-icon text-[9px] leading-tight text-center"
-                            style={{ backgroundColor: journalColors[journal] || '#666' }}
+                            style={{ backgroundColor: journalColors[journal.title] || '#666' }}
                         >
-                            {journal.split(' ').map(w => w[0]).join('').slice(0, 3)}
+                            {journal.title.split(' ').map((w: string) => w[0]).join('').slice(0, 3).toUpperCase()}
                         </div>
                         <span className="text-[13px] text-mdpi-text-dark group-hover:text-mdpi-blue transition-colors">
-                            {journal}
+                            {journal.title}
                         </span>
                     </Link>
                 ))}

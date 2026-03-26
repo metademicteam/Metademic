@@ -4,6 +4,7 @@ import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import Link from "next/link";
 import { BookOpen, Search, FileEdit, Award, Microscope, Database, Globe, Zap } from 'lucide-react';
+import { createClient } from "@/utils/supabase/server";
 
 export const metadata = {
     title: "Journals | Metademic",
@@ -13,7 +14,7 @@ export const metadata = {
 const serviceCards = [
     {
         title: "Active Journals",
-        desc: "Browse our complete list of 511 open access journals.",
+        desc: "Browse our complete list of open access journals.",
         href: "/journals/active",
         icon: BookOpen,
         color: "bg-blue-500"
@@ -41,14 +42,34 @@ const serviceCards = [
     }
 ];
 
-const stats = [
-    { label: "Journals", value: "511+" },
-    { label: "Articles Published", value: "1.2M+" },
-    { label: "Editorial Boards", value: "35,000+" },
-    { label: "Reviewers", value: "150,000+" }
-];
+export default async function JournalsLandingPage() {
+    const supabase = await createClient();
 
-export default function JournalsLandingPage() {
+    // Fetch total active journals count
+    const { count: totalJournals } = await supabase
+        .from("journals")
+        .select("*", { count: 'exact', head: true })
+        .eq("is_active", true);
+
+    // Fetch total published articles count
+    const { count: totalArticles } = await supabase
+        .from("articles")
+        .select("*", { count: 'exact', head: true })
+        .eq("status", "published");
+
+    // Fetch Subjects
+    const { data: subjects } = await supabase
+        .from("subjects")
+        .select("id, name, slug")
+        .limit(8);
+
+    const stats = [
+        { label: "Journals", value: `${totalJournals || 0}+` },
+        { label: "Articles Published", value: `${totalArticles || 0}+` },
+        { label: "Editorial Boards", value: "35,000+" },
+        { label: "Reviewers", value: "150,000+" }
+    ];
+
     return (
         <div className="min-h-screen flex flex-col bg-mdpi-gray-bg text-[14px]">
             <Navbar />
@@ -161,13 +182,13 @@ export default function JournalsLandingPage() {
                         <div className="space-y-4">
                             <h2 className="text-[18px] font-extrabold text-mdpi-text-dark">Browse by Discipline</h2>
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                {['Physical Sciences', 'Life Sciences', 'Medicine & Health', 'Engineering', 'Social Sciences', 'Humanities', 'Applied Sciences', 'Business & Mgmt'].map(cat => (
+                                {(subjects || []).map(cat => (
                                     <Link 
-                                        key={cat} 
-                                        href={`/journals/subject/${cat.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-')}`}
+                                        key={cat.id} 
+                                        href={`/journals/subject/${cat.slug}`}
                                         className="bg-white px-4 py-3 rounded border border-mdpi-border text-center font-medium hover:bg-mdpi-blue hover:text-white hover:border-mdpi-blue transition-all no-underline text-[13px]"
                                     >
-                                        {cat}
+                                        {cat.name}
                                     </Link>
                                 ))}
                             </div>

@@ -3,161 +3,47 @@ import Footer from "@/components/Footer";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import { Info, BookOpen, Users, DollarSign, Award, ShieldCheck } from 'lucide-react';
+import { createClient, createAdminClient } from "@/utils/supabase/server";
+import { notFound } from "next/navigation";
 
 export const revalidate = 86400; // ISR validation every 24 hours
 
-const pageData: Record<string, { title: string, content: React.ReactNode, icon: React.ElementType }> = {
-    'authors': {
-        title: "Information for Authors",
-        icon: Users,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Guidelines for Preparing and Submitting Your Manuscript</h3>
-                <p className="mb-4 text-mdpi-gray-text">
-                    Metademic provides researchers with a fast, rigorous, and efficient peer-review process. Our open access model ensures that your research gains maximum visibility and impact worldwide immediately upon publication.
-                </p>
-                <h4 className="font-bold mb-2">1. Manuscript Submission</h4>
-                <p className="mb-4 text-mdpi-gray-text">
-                    All manuscripts must be submitted through our centralized submission portal. Prior to submission, please ensure your manuscript adheres to our formatting guidelines and ethical standards.
-                </p>
-                <h4 className="font-bold mb-2">2. Peer-Review Process</h4>
-                <p className="mb-4 text-mdpi-gray-text">
-                    We employ a double-blind peer-review process. Upon submission, an initial quality check is performed, followed by assignment to independent expert reviewers in the field.
-                </p>
-            </>
-        )
-    },
-    'reviewers': {
-        title: "Information for Reviewers",
-        icon: ShieldCheck,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Guidelines and Benefits for Metademic Reviewers</h3>
-                <p className="mb-4 text-mdpi-gray-text">
-                    Peer-review is the cornerstone of scientific publishing. Metademic relies on the dedication and expertise of our reviewers to maintain the high quality of our journals.
-                </p>
-                <ul className="list-disc pl-6 mb-4 text-mdpi-gray-text space-y-2">
-                    <li>Receive discount vouchers for future APCs when you submit your own papers.</li>
-                    <li>Personalized reviewer certificates.</li>
-                    <li>Acknowledgment in the journal&apos;s annual reviewer list.</li>
-                </ul>
-            </>
-        )
-    },
-    'editors': {
-        title: "Information for Editors",
-        icon: BookOpen,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Editorial Board Responsibilities</h3>
-                <p className="mb-4 text-mdpi-gray-text">
-                    Editorial Board Members play a vital role in steering the direction of Metademic journals. They are responsible for making final decisions on manuscripts, soliciting high-quality papers, and suggesting special issues.
-                </p>
-            </>
-        )
-    },
-    'librarians': {
-        title: "Information for Librarians",
-        icon: LibraryIcon,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Institutional Support and Access</h3>
-                <p className="mb-4 text-mdpi-gray-text">
-                    Metademic supports the transition toward full open access. We collaborate closely with libraries through our Institutional Open Access Program (IOAP), which offers reduced Article Processing Charges (APCs) for affiliated researchers.
-                </p>
-            </>
-        )
-    },
-    'open-access-policy': {
-        title: "Open Access Policy",
-        icon: GlobeIcon,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Our Commitment to Open Science</h3>
-                <p className="mb-4 text-mdpi-gray-text">
-                    All articles published by Metademic are immediately available worldwide under an open access license. This means:
-                </p>
-                <ul className="list-disc pl-6 mb-4 text-mdpi-gray-text space-y-2">
-                    <li>Everyone has free and unlimited access to the full-text of all articles published in Metademic journals.</li>
-                    <li>Everyone is free to re-use the published material given proper accreditation/citation.</li>
-                    <li>Open access publication is supported by the authors&apos; institutes or research funding agencies.</li>
-                </ul>
-            </>
-        )
-    },
-    'article-processing-charges': {
-        title: "Article Processing Charges (APC)",
-        icon: DollarSign,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Transparent Publishing Costs</h3>
-                <p className="mb-4 text-mdpi-gray-text">
-                    To provide open access, Metademic journals use a business model in which our expenses—including those of peer review, journal production, and online hosting and archiving—are recovered by charging an Article Processing Charge (APC) to the authors or their institutions.
-                </p>
-                <p className="text-mdpi-gray-text font-bold">
-                    There are no submission charges.
-                </p>
-            </>
-        )
-    },
-    'awards': {
-        title: "Awards",
-        icon: Award,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Recognizing Excellence</h3>
-                <p className="mb-4 text-mdpi-gray-text">
-                    Metademic sponsors various awards to support scientific research and recognize excellence across multiple disciplines. Our awards include:
-                </p>
-                <ul className="list-disc pl-6 mb-4 text-mdpi-gray-text space-y-2">
-                    <li>Young Investigator Awards</li>
-                    <li>Best Paper Awards</li>
-                    <li>Travel Awards</li>
-                    <li>Outstanding Reviewer Awards</li>
-                </ul>
-            </>
-        )
-    }
-    // Add fallback for others...
+const iconMap: Record<string, React.ElementType> = {
+    'users': Users,
+    'shield-check': ShieldCheck,
+    'book-open': BookOpen,
+    'dollar-sign': DollarSign,
+    'award': Award,
+    'info': Info
 };
 
-// Extraneous icons for demo
-function LibraryIcon(props: React.ComponentProps<typeof BookOpen>) { return <BookOpen {...props} /> }
-function GlobeIcon(props: React.ComponentProps<typeof Info>) { return <Info {...props} /> }
-
-export function generateStaticParams() {
-    return [
-        { slug: 'authors' },
-        { slug: 'reviewers' },
-        { slug: 'editors' },
-        { slug: 'librarians' },
-        { slug: 'publishers' },
-        { slug: 'societies' },
-        { slug: 'conference-organizers' },
-        { slug: 'open-access-policy' },
-        { slug: 'institutional-open-access-program' },
-        { slug: 'special-issues-guidelines' },
-        { slug: 'editorial-process' },
-        { slug: 'research-and-publication-ethics' },
-        { slug: 'article-processing-charges' },
-        { slug: 'awards' },
-        { slug: 'testimonials' },
-    ];
+export async function generateStaticParams() {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+        .from("site_content")
+        .select("slug")
+        .eq("category", "information");
+    
+    return (data || []).map(item => ({
+        slug: item.slug
+    }));
 }
 
 export default async function InformationPage({ params }: { params: Promise<{ slug: string }> }) {
     const slug = (await params).slug;
-    const pageInfo = pageData[slug] || {
-        title: `Information regarding ${slug.replace(/-/g, ' ')}`,
-        icon: Info,
-        content: (
-            <>
-                <p className="text-mdpi-gray-text">Detailed information and guidelines for this section are being updated to reflect the latest Metademic policies.</p>
-            </>
-        )
-    };
+    const supabase = await createClient();
 
-    const Icon = pageInfo.icon;
+    const { data: pageInfo } = await supabase
+        .from("site_content")
+        .select("*")
+        .eq("slug", slug)
+        .single();
+
+    if (!pageInfo) {
+        notFound();
+    }
+
+    const Icon = iconMap[pageInfo.icon_name || 'info'] || Info;
 
     return (
         <div className="min-h-screen flex flex-col bg-mdpi-gray-bg text-[14px]">
@@ -168,7 +54,7 @@ export default async function InformationPage({ params }: { params: Promise<{ sl
                     <div className="p-3 bg-white/10 rounded-lg">
                         <Icon size={32} />
                     </div>
-                    <h1 className="text-3xl font-extrabold capitalize">{pageInfo.title.toLowerCase()}</h1>
+                    <h1 className="text-3xl font-extrabold capitalize">{pageInfo.title}</h1>
                 </div>
             </div>
 
@@ -180,7 +66,8 @@ export default async function InformationPage({ params }: { params: Promise<{ sl
 
                     <div className="flex-1 min-w-0">
                         <div className="bg-white p-8 rounded border border-mdpi-border shadow-sm">
-                            {pageInfo.content}
+                            <div className="prose prose-sm max-w-none prose-headings:text-mdpi-text-dark prose-p:text-mdpi-gray-text prose-a:text-mdpi-link-blue hover:prose-a:underline" dangerouslySetInnerHTML={{ __html: pageInfo.content_html }}>
+                            </div>
 
                             <div className="mt-8 pt-6 border-t border-mdpi-border bg-mdpi-gray-bg/50 p-4 rounded text-[13px] text-mdpi-gray-text">
                                 <strong>Need further assistance?</strong> Contact our support team at <a href="mailto:support@metademic.com" className="text-mdpi-link-blue hover:underline">support@metademic.com</a>

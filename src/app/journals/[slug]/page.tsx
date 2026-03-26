@@ -14,183 +14,125 @@ import {
     Award
 } from 'lucide-react';
 import { notFound } from "next/navigation";
+import { createClient, createAdminClient } from "@/utils/supabase/server";
 
 export const revalidate = 86400; // ISR validation every 24 hours
 
-// Mock database of journals for ISR generation
-const journalDatabase: Record<string, { 
-    name: string, 
-    acronym: string, 
-    issn: string,
-    impactFactor: string, 
-    citeScore: string,
-    apc: string,
-    color: string,
-    description: string,
-    aims: string[]
-}> = {
-    'sustainability': {
-        name: "Sustainability",
-        acronym: "SU",
-        issn: "2071-1050",
-        impactFactor: "3.8",
-        citeScore: "5.8",
-        apc: "2400 USD",
-        color: "#4caf50",
-        description: "Sustainability is an international, cross-disciplinary, scholarly, peer-reviewed and open access journal of environmental, cultural, economic, and social sustainability of human beings.",
-        aims: [
-            "Sustainable Engineering and Science",
-            "Energy Sustainability",
-            "Economic aspects of sustainability",
-            "Sustainable agriculture",
-            "Urban sustainability and smart cities"
-        ]
-    },
-    'sensors': {
-        name: "Sensors",
-        acronym: "SE",
-        issn: "1424-8220",
-        impactFactor: "3.9",
-        citeScore: "7.3",
-        apc: "2600 USD",
-        color: "#ff9800",
-        description: "Sensors is the leading international, peer-reviewed, open access journal on the science and technology of sensors. Sensors is published semimonthly online by Metademic.",
-        aims: [
-            "Physical sensors",
-            "Chemical sensors",
-            "Biosensors",
-            "Optical sensors",
-            "Internet of Things (IoT) sensors"
-        ]
-    },
-    'ijms': {
-        name: "International Journal of Molecular Sciences",
-        acronym: "IJMS",
-        issn: "1422-0067",
-        impactFactor: "5.6",
-        citeScore: "7.8",
-        apc: "2900 USD",
-        color: "#9c27b0",
-        description: "International Journal of Molecular Sciences is an international, peer-reviewed, open access journal providing an advanced forum for biochemistry, molecular and cell biology, molecular biophysics, molecular medicine, and all aspects of molecular research in chemistry.",
-        aims: [
-            "Molecular biology, molecular biophysics",
-            "Biochemistry",
-            "Molecular medicine",
-            "Molecular plant sciences",
-            "Material science and applications"
-        ]
-    },
-    'cancers': {
-        name: "Cancers",
-        acronym: "CA",
-        issn: "2072-6694",
-        impactFactor: "5.2",
-        citeScore: "7.4",
-        apc: "2900 USD",
-        color: "#f44336",
-        description: "Cancers is a peer-reviewed, open access journal of oncology. It publishes research papers, reviews, editorials, communications, and short notes.",
-        aims: [
-            "Tumor biology and immunology",
-            "Cancer therapy and prevention",
-            "Cancer biomarkers",
-            "Epidemiology",
-            "Clinical trials in oncology"
-        ]
-    },
-    'applied-sciences': {
-        name: "Applied Sciences",
-        acronym: "AS",
-        issn: "2076-3417",
-        impactFactor: "2.7",
-        citeScore: "4.5",
-        apc: "2400 USD",
-        color: "#e91e63",
-        description: "Applied Sciences is an international, peer-reviewed, open access journal on all aspects of applied natural sciences published semimonthly online by Metademic.",
-        aims: [
-            "Acoustics and Vibrations",
-            "Applied Biosciences and Bioengineering",
-            "Applied Dentistry",
-            "Applied Materials",
-            "Computing and Artificial Intelligence"
-        ]
-    }
+type SupabaseArticle = {
+  id: string;
+  title: string;
+  submission_type: string;
+  published_at: string | null;
+  views_count: number;
+  downloads_count: number;
+  authors: { full_name: string; author_order: number }[];
 };
 
-export function generateStaticParams() {
-    return Object.keys(journalDatabase).map((slug) => ({
-        slug: slug,
+export async function generateStaticParams() {
+    const supabase = createAdminClient();
+    const { data: journals } = await supabase
+        .from("journals")
+        .select("slug")
+        .eq("is_active", true);
+        
+    return (journals || []).map((j) => ({
+        slug: j.slug,
     }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const slug = (await params).slug;
-    const journal = journalDatabase[slug];
+    const supabase = createAdminClient();
+    const { data: journal } = await supabase
+        .from("journals")
+        .select("title, description")
+        .eq("slug", slug)
+        .single();
     
     if (!journal) {
         return { title: 'Journal Not Found | Metademic' };
     }
 
     return {
-        title: `${journal.name} | An Open Access Journal by Metademic`,
+        title: `${journal.title} | An Open Access Journal by Metademic`,
         description: journal.description,
     };
 }
 
 export default async function JournalHomePage({ params }: { params: Promise<{ slug: string }> }) {
     const slug = (await params).slug;
-    const journal = journalDatabase[slug];
+    const supabase = await createClient();
+
+    // Fetch Journal Details
+    const { data: journal } = await supabase
+        .from("journals")
+        .select("*")
+        .eq("slug", slug)
+        .single();
 
     if (!journal) {
         notFound();
     }
 
-    // Mock recent articles
-    const recentArticles = [
-        {
-            title: "Advancements in Machine Learning for Predictive Modeling in Healthcare",
-            authors: "Sarah Johnson, Michael Chen, David Smith",
-            type: "Article",
-            date: "17 Mar 2026",
-            views: 1240,
-            downloads: 385
-        },
-        {
-            title: "A Comprehensive Review of Renewable Energy Storage Solutions in Urban Environments",
-            authors: "Elena Rodriguez, James Wilson",
-            type: "Review",
-            date: "15 Mar 2026",
-            views: 3100,
-            downloads: 890
-        },
-        {
-            title: "Evaluating the Impact of Microplastics on Marine Biodiversity Ecosystems",
-            authors: "Robert Taylor, Anna Kowalski, Li Wei",
-            type: "Article",
-            date: "12 Mar 2026",
-            views: 950,
-            downloads: 210
-        }
-    ];
+    // Fetch recent articles for this journal
+    const { data: articles } = await supabase
+        .from("articles")
+        .select(`
+            id,
+            title,
+            submission_type,
+            published_at,
+            views_count,
+            downloads_count,
+            authors:article_authors (
+                full_name,
+                author_order
+            )
+        `)
+        .eq("journal_id", journal.id)
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
+        .limit(5) as { data: SupabaseArticle[] | null };
+
+    const mappedArticles = (articles || []).map(art => ({
+        title: art.title,
+        authors: art.authors
+            .sort((a, b) => a.author_order - b.author_order)
+            .map(auth => auth.full_name)
+            .join(', '),
+        type: art.submission_type.charAt(0).toUpperCase() + art.submission_type.slice(1),
+        date: art.published_at 
+          ? new Date(art.published_at).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
+          : "Recently",
+        views: art.views_count,
+        downloads: art.downloads_count
+    }));
+
+    const color = (journal as { color?: string }).color || "#004a99"; // Fallback color
 
     return (
         <div className="min-h-screen flex flex-col bg-mdpi-gray-bg text-[14px]">
             <Navbar />
             
             {/* Journal Hero Section */}
-            <div className="bg-[#1a252f] text-white pt-10 pb-12 relative overflow-hidden" style={{ borderBottom: `4px solid ${journal.color}` }}>
+            <div className="bg-[#1a252f] text-white pt-10 pb-12 relative overflow-hidden" style={{ borderBottom: `4px solid ${color}` }}>
                 {/* Background Decor */}
                 <div 
                     className="absolute right-0 top-0 w-96 h-96 opacity-10 -mr-24 -mt-24 rounded-full blur-3xl mix-blend-screen"
-                    style={{ backgroundColor: journal.color }}
+                    style={{ backgroundColor: color }}
                 ></div>
 
                 <div className="max-w-[1280px] mx-auto px-4 relative z-10 flex flex-col md:flex-row gap-8 items-start md:items-center">
                     {/* Journal Logo/Acronym Block */}
                     <div 
                         className="w-24 h-24 md:w-32 md:h-32 rounded-xl flex items-center justify-center text-white text-3xl md:text-4xl font-extrabold shadow-2xl flex-shrink-0 border-2 border-white/20"
-                        style={{ backgroundColor: journal.color }}
+                        style={{ backgroundColor: color }}
                     >
-                        {journal.acronym}
+                        {journal.short_title}
                     </div>
                     
                     {/* Journal Details */}
@@ -204,15 +146,15 @@ export default async function JournalHomePage({ params }: { params: Promise<{ sl
                             </span>
                         </div>
                         <h1 className="text-3xl md:text-5xl font-extrabold mb-3 tracking-tight">
-                            {journal.name}
+                            {journal.title}
                         </h1>
                         <p className="text-white/70 text-[15px] max-w-3xl mb-4 leading-relaxed line-clamp-2">
                             {journal.description}
                         </p>
                         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-white/90">
-                            <span className="flex items-center gap-1.5 font-bold"><BookOpen size={16} className="opacity-80" /> ISSN: {journal.issn}</span>
-                            <span className="flex items-center gap-1.5 font-bold"><TrendingUp size={16} className="text-green-400" /> Impact Factor: {journal.impactFactor}</span>
-                            <span className="flex items-center gap-1.5 font-bold"><Star size={16} className="text-yellow-400" /> CiteScore: {journal.citeScore}</span>
+                            <span className="flex items-center gap-1.5 font-bold"><BookOpen size={16} className="opacity-80" /> ISSN: {journal.issn_online || journal.issn_print}</span>
+                            <span className="flex items-center gap-1.5 font-bold"><TrendingUp size={16} className="text-green-400" /> Impact Factor: {journal.impact_factor || 'N/A'}</span>
+                            <span className="flex items-center gap-1.5 font-bold"><Star size={16} className="text-yellow-400" /> CiteScore: {journal.cite_score || 'N/A'}</span>
                         </div>
                     </div>
 
@@ -222,7 +164,7 @@ export default async function JournalHomePage({ params }: { params: Promise<{ sl
                             href="/submit"
                             className="block w-full text-center px-8 py-4 bg-mdpi-green hover:bg-emerald-600 text-white font-extrabold rounded shadow-lg transition-all hover:-translate-y-1 text-[16px]"
                         >
-                            Submit to {journal.acronym}
+                            Submit to {journal.short_title}
                         </Link>
                     </div>
                 </div>
@@ -237,7 +179,7 @@ export default async function JournalHomePage({ params }: { params: Promise<{ sl
                         <Link href="/information/authors" className="hover:text-mdpi-blue flex items-center gap-1.5"><FileText size={15} /> Instructions for Authors</Link>
                     </div>
                     <div className="flex gap-6 text-mdpi-gray-text">
-                        <span><strong>APC:</strong> {journal.apc}</span>
+                        <span><strong>APC:</strong> {journal.submission_fee ? `${journal.submission_fee} USD` : 'Free'}</span>
                         <span><strong>Time to First Decision:</strong> ~16 Days</span>
                     </div>
                 </div>
@@ -270,14 +212,8 @@ export default async function JournalHomePage({ params }: { params: Promise<{ sl
                                 Aims & Scope
                             </h2>
                             <p className="text-mdpi-gray-text leading-relaxed mb-6">
-                                {journal.description} It provides an advanced forum for studies related to its core disciplines. Our aim is to encourage scientists to publish their experimental and theoretical results in as much detail as possible.
+                                {journal.aims_scope || journal.description}
                             </p>
-                            <h3 className="font-extrabold text-mdpi-text-dark mb-3 text-[15px]">Subject areas include, but are not limited to:</h3>
-                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-6 list-disc pl-5 text-[13px] text-mdpi-gray-text font-medium">
-                                {journal.aims.map((aim, idx) => (
-                                    <li key={idx} className="marker:text-mdpi-blue">{aim}</li>
-                                ))}
-                            </ul>
                         </div>
 
                         {/* Recent Articles */}
@@ -290,7 +226,7 @@ export default async function JournalHomePage({ params }: { params: Promise<{ sl
                             </div>
                             
                             <div className="space-y-4">
-                                {recentArticles.map((article, idx) => (
+                                {mappedArticles.length > 0 ? mappedArticles.map((article, idx) => (
                                     <div key={idx} className="bg-white p-5 rounded border border-mdpi-border shadow-sm hover:border-mdpi-blue transition-colors group">
                                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                                             <span className="inline-block px-2 py-0.5 bg-mdpi-blue/10 text-mdpi-blue font-extrabold text-[11px] uppercase rounded">
@@ -317,7 +253,11 @@ export default async function JournalHomePage({ params }: { params: Promise<{ sl
                                             </div>
                                         </div>
                                     </div>
-                                ))}
+                                )) : (
+                                    <div className="bg-white p-8 rounded border border-mdpi-border text-center text-mdpi-gray-text italic">
+                                        No articles published in this journal yet.
+                                    </div>
+                                )}
                             </div>
                         </div>
 

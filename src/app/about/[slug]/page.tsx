@@ -3,134 +3,47 @@ import Footer from "@/components/Footer";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import { Info, Mail, Briefcase, Newspaper, Camera, Edit3 } from 'lucide-react';
+import { createClient, createAdminClient } from "@/utils/supabase/server";
+import { notFound } from "next/navigation";
 
 export const revalidate = 86400; // ISR validation every 24 hours
 
-const pageData: Record<string, { title: string, content: React.ReactNode, icon: React.ElementType }> = {
-    'overview': {
-        title: "Overview",
-        icon: Info,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">About Metademic</h3>
-                <p className="mb-4 text-mdpi-gray-text leading-relaxed">
-                    A pioneer in scholarly, open access publishing, Metademic has supported academic communities since its inception. Based in Dhaka, Bangladesh with editorial and production teams around the world, Metademic pursues its mission to foster open scientific exchange across all disciplines.
-                </p>
-                <h4 className="font-bold mb-2">Our Mission</h4>
-                <p className="mb-4 text-mdpi-gray-text leading-relaxed">
-                    Our mission is to foster open scientific exchange in all forms, across all disciplines. We do this by ensuring that the latest research findings are freely available, and that authors receive rigorous, constructive, and speedy peer-review.
-                </p>
-            </>
-        )
-    },
-    'contact': {
-        title: "Contact Us",
-        icon: Mail,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Get in Touch with Metademic</h3>
-                <p className="mb-4 text-mdpi-gray-text leading-relaxed">
-                    For general inquiries, editorial questions, or technical support, please refer to the contact options below.
-                </p>
-                <div className="bg-mdpi-gray-bg/50 p-6 rounded border border-mdpi-border grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h5 className="font-bold text-mdpi-text-dark">Editorial Office</h5>
-                        <p className="text-mdpi-gray-text mt-2 text-[13px]">
-                            House 12, Road 4, Dhanmondi<br />
-                            Dhaka 1205, Bangladesh<br />
-                            <a href="mailto:support@metademic.com" className="text-mdpi-blue hover:underline">support@metademic.com</a>
-                        </p>
-                    </div>
-                </div>
-            </>
-        )
-    },
-    'careers': {
-        title: "Careers",
-        icon: Briefcase,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Join Our Global Team</h3>
-                <p className="mb-4 text-mdpi-gray-text leading-relaxed">
-                    At Metademic, we are dedicated to academic publishing. Are you highly motivated, detail-oriented, and looking to forge a career within academic open access publishing? We are always seeking talented individuals to join our international offices.
-                </p>
-                <button className="px-6 py-2 bg-mdpi-blue text-white font-bold rounded shadow hover:bg-mdpi-blue-dark transition-colors">
-                    View Open Positions
-                </button>
-            </>
-        )
-    },
-    'news': {
-        title: "News",
-        icon: Newspaper,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Latest Updates</h3>
-                <ul className="space-y-4">
-                    <li className="p-4 border border-mdpi-border rounded hover:bg-mdpi-gray-bg/50 transition-colors">
-                        <span className="text-[12px] text-mdpi-gray-text font-bold">March 17, 2026</span>
-                        <h5 className="font-bold text-mdpi-blue cursor-pointer hover:underline text-[15px] mt-1">Metademic Surpasses 500 Open Access Journals</h5>
-                        <p className="text-[13px] text-mdpi-gray-text mt-2">A major milestone representing our continuous growth and commitment to global researchers.</p>
-                    </li>
-                    <li className="p-4 border border-mdpi-border rounded hover:bg-mdpi-gray-bg/50 transition-colors">
-                        <span className="text-[12px] text-mdpi-gray-text font-bold">February 28, 2026</span>
-                        <h5 className="font-bold text-mdpi-blue cursor-pointer hover:underline text-[15px] mt-1">New API Tools Released for Institutional Partners</h5>
-                        <p className="text-[13px] text-mdpi-gray-text mt-2">Simplifying the integration of publication metrics for IOAP libraries.</p>
-                    </li>
-                </ul>
-            </>
-        )
-    },
-    'press': {
-        title: "Press",
-        icon: Camera,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Press Releases</h3>
-                <p className="mb-4 text-mdpi-gray-text leading-relaxed">
-                    View official statements, announcements, and media assets regarding Metademic.
-                </p>
-            </>
-        )
-    },
-    'blog': {
-        title: "Blog",
-        icon: Edit3,
-        content: (
-            <>
-                <h3 className="text-xl font-bold mb-4 text-mdpi-text-dark text-mdpi-blue border-b border-mdpi-border pb-2">Metademic Blog</h3>
-                <p className="mb-4 text-mdpi-gray-text leading-relaxed">
-                    Read the latest insights from our editorial team, author interviews, and discussions on open science.
-                </p>
-            </>
-        )
-    }
+const iconMap: Record<string, React.ElementType> = {
+    'info': Info,
+    'mail': Mail,
+    'briefcase': Briefcase,
+    'newspaper': Newspaper,
+    'camera': Camera,
+    'edit3': Edit3
 };
 
-export function generateStaticParams() {
-    return [
-        { slug: 'overview' },
-        { slug: 'contact' },
-        { slug: 'careers' },
-        { slug: 'news' },
-        { slug: 'press' },
-        { slug: 'blog' },
-    ];
+export async function generateStaticParams() {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+        .from("site_content")
+        .select("slug")
+        .eq("category", "about");
+    
+    return (data || []).map(item => ({
+        slug: item.slug
+    }));
 }
 
 export default async function AboutPage({ params }: { params: Promise<{ slug: string }> }) {
     const slug = (await params).slug;
-    const pageInfo = pageData[slug] || {
-        title: `About ${slug.replace(/-/g, ' ')}`,
-        icon: Info,
-        content: (
-            <>
-                <p className="text-mdpi-gray-text leading-relaxed">More information about {slug.replace(/-/g, ' ')} will be available soon.</p>
-            </>
-        )
-    };
+    const supabase = await createClient();
 
-    const Icon = pageInfo.icon;
+    const { data: pageInfo } = await supabase
+        .from("site_content")
+        .select("*")
+        .eq("slug", slug)
+        .single();
+
+    if (!pageInfo) {
+        notFound();
+    }
+
+    const Icon = iconMap[pageInfo.icon_name || 'info'] || Info;
 
     return (
         <div className="min-h-screen flex flex-col bg-mdpi-gray-bg text-[14px]">
@@ -159,7 +72,8 @@ export default async function AboutPage({ params }: { params: Promise<{ slug: st
                     
                     <div className="flex-1 min-w-0">
                         <div className="bg-white p-8 md:p-10 rounded shadow-sm border border-mdpi-border">
-                            {pageInfo.content}
+                            <div className="prose prose-sm max-w-none prose-headings:text-mdpi-text-dark prose-p:text-mdpi-gray-text prose-a:text-mdpi-link-blue hover:prose-a:underline" dangerouslySetInnerHTML={{ __html: pageInfo.content_html }}>
+                            </div>
                             
                             <div className="mt-10 pt-6 border-t border-mdpi-border flex items-center justify-between text-[13px] text-mdpi-gray-text">
                                 <span>Stay connected with Metademic</span>
